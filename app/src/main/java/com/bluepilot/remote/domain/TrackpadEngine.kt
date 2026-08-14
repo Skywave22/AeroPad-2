@@ -7,10 +7,8 @@ import com.bluepilot.remote.model.MouseSettings
  * OPTIMIZATION: single shared trackpad state machine.
  *
  * The smoothing + fractional-carry + scroll-accumulation pipeline was
- * copy-pasted in 3 ViewModels (RemoteControl, PcCombo, WidgetInteractor).
- * This class is now the one implementation (~20 lines replacing ~90).
- * AirMouseCore keeps its own variant intentionally: its input domain is
- * angular velocity, not pixel deltas.
+ * shared by the ViewModels that host a trackpad surface. This class is
+ * the one implementation (~20 lines replacing ~90).
  */
 class TrackpadEngine(private val settings: () -> MouseSettings) {
 

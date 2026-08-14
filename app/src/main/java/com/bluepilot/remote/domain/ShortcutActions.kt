@@ -20,7 +20,7 @@ object ShortcutActions {
     fun routeFor(action: String?): String = when (action) {
         OPEN_KEYBOARD -> "full_keyboard"
         OPEN_MOUSE -> "mouse"
-        OPEN_GAMEPAD -> "gamepad_builder"
+        OPEN_GAMEPAD -> "gamepad"
         OPEN_MEDIA -> "multimedia"
         else -> ROUTE_HOME
     }

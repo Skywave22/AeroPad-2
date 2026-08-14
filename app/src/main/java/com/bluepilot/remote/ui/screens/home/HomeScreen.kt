@@ -90,20 +90,13 @@ private val heroEntries = listOf(
 
 // Tier 2 — remaining control surfaces.
 private val controlEntries = listOf(
-    Entry("Air Mouse", "Point to move", Icons.Rounded.Mouse, Routes.AIR_MOUSE, 0xFF00C2A8),
     Entry("Multimedia", "Media & volume", Icons.Rounded.MusicNote, Routes.MULTIMEDIA, 0xFF17C3CE),
-    Entry("Numpad", "Numeric keypad", Icons.Rounded.Pin, Routes.NUMPAD, 0xFFFF8C42),
-    Entry("Presenter", "Slide control", Icons.Rounded.Slideshow, Routes.PRESENTER, 0xFFF5C542),
-    Entry("Layouts", "Custom decks", Icons.Rounded.Dashboard, Routes.LAYOUTS, 0xFF2ED5A5),
-    Entry("Macros", "Record & play", Icons.Rounded.Bolt, Routes.MACROS, 0xFF57D163)
+    Entry("Presenter", "Slide control", Icons.Rounded.Slideshow, Routes.PRESENTER, 0xFFF5C542)
 )
 
 // Tier 3 — setup & tools (compact rows).
 private val setupEntries = listOf(
     Entry("Connect", "Pair with a PC or device", Icons.Rounded.Bluetooth, Routes.CONNECTION, 0xFF2F6BFF, needsPermissions = true),
-    Entry("WiFi Control", "Control over your network", Icons.Rounded.Wifi, Routes.WIFI_CONNECT, 0xFF00B0FF),
-    Entry("Health", "Live connection metrics", Icons.Rounded.MonitorHeart, Routes.CONNECTION_HEALTH, 0xFF00C853),
-    Entry("Themes", "Change the whole look", Icons.Rounded.Palette, Routes.THEMES, 0xFFB86BFF),
     Entry("Settings", "Tune everything", Icons.Rounded.Settings, Routes.SETTINGS, 0xFF8B9BB5),
     Entry("Help", "Pairing & troubleshooting", Icons.AutoMirrored.Rounded.HelpOutline, Routes.HELP, 0xFF64B6F0)
 )

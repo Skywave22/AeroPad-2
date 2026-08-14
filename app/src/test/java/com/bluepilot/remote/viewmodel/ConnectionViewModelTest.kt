@@ -65,13 +65,10 @@ class ConnectionViewModelTest {
                 _profiles.value,
                 com.bluepilot.remote.data.hosts.HostProfile(
                     id = mac, label = label,
-                    transport = com.bluepilot.remote.data.hosts.HostProfile.TRANSPORT_BT,
                     address = mac
                 )
             )
         }
-        override fun saveWifi(label: String, host: String, port: Int, pin: String?) {}
-        override fun pinFor(profile: com.bluepilot.remote.data.hosts.HostProfile) = ""
         override fun touch(id: String) {}
         override fun remove(id: String) {
             _profiles.value = com.bluepilot.remote.data.hosts.HostProfileCodec.remove(_profiles.value, id)

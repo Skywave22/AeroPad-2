@@ -60,6 +60,7 @@ class HidEngine @Inject constructor(
         const val KEY_TAP_DELAY_MS = 8L
         const val RECONNECT_MAX_ATTEMPTS = 4
         const val RECONNECT_BASE_DELAY_MS = 1000L
+        const val CONNECT_TIMEOUT_MS = 12_000L
     }
 
     // Single-thread executor keeps report order deterministic and latency low.
@@ -179,12 +180,40 @@ class HidEngine @Inject constructor(
             start()
             return
         }
+        // HID FIX: connecting to an unbonded device silently fails on most
+        // ROMs — surface a clear, actionable error instead.
+        if (!device.safeBonded()) {
+            _state.value = HidConnectionState.Error(
+                "${device.safeName()} is not paired. Pair it in Bluetooth settings first."
+            )
+            return
+        }
         _state.value = HidConnectionState.Connecting(device.toRemote())
         val ok = runCatching { hd.connect(device) }
             .onFailure { Timber.e(it, "connect() threw") }
             .getOrDefault(false)
         if (!ok) {
             _state.value = HidConnectionState.Error("Could not start connection to ${device.safeName()}.")
+            return
+        }
+        // HID FIX: some hosts never answer — without a timeout the UI hangs
+        // in "Connecting…" forever. 12s covers slow hosts comfortably.
+        watchConnectTimeout(device)
+    }
+
+    /** HID FIX: fail Connecting → Error if no answer within the timeout. */
+    private fun watchConnectTimeout(device: BluetoothDevice) {
+        val startedFor = device.address
+        scope.launch {
+            delay(CONNECT_TIMEOUT_MS)
+            val s = _state.value
+            if (s is HidConnectionState.Connecting && s.device.address == startedFor) {
+                Timber.w("connect timeout for %s", startedFor)
+                runCatching { hidDevice?.disconnect(device) }
+                _state.value = HidConnectionState.Error(
+                    "${device.safeName()} did not answer. Make sure Bluetooth is on at the PC and try again."
+                )
+            }
         }
     }
 
@@ -392,6 +421,14 @@ class HidEngine @Inject constructor(
                     reconnectAttempts = 0
                     _reconnectStatus.value = null           // ADV S5
                     health.markConnected()                   // ADV S5
+                    // HID FIX: release everything on (re)connect. If the link
+                    // dropped mid-press the host still believes a key/button
+                    // is held ("stuck key") — clean reports fix that.
+                    scope.launch {
+                        report(HidDescriptors.REPORT_ID_KEYBOARD, HidReportBuilder.keyboardRelease())
+                        report(HidDescriptors.REPORT_ID_MOUSE, HidReportBuilder.mouse())
+                        report(HidDescriptors.REPORT_ID_CONSUMER, HidReportBuilder.consumerRelease())
+                    }
                     device?.let {
                         history.onConnected("BLUETOOTH", it.safeName())   // #41
                         _state.value = HidConnectionState.Connected(it.toRemote())

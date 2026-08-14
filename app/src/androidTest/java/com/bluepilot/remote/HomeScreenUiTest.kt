@@ -37,8 +37,7 @@ class HomeScreenUiTest {
         composeRule.onNodeWithText("Connect").assertIsDisplayed()
         composeRule.onNodeWithText("Mouse").assertIsDisplayed()
         composeRule.onNodeWithText("Keyboard").assertIsDisplayed()
-        composeRule.onNodeWithText("Layouts").assertIsDisplayed()
-        composeRule.onNodeWithText("Macros").assertIsDisplayed()
+        composeRule.onNodeWithText("Multimedia").assertIsDisplayed()
     }
 
     @Test

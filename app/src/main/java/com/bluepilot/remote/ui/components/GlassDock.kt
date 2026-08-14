@@ -28,7 +28,7 @@ import androidx.compose.ui.draw.shadow
 /**
  * UI/UX REDESIGN — Floating glass bottom dock (the pill dock from the
  * v2-01 mockups). Shown on top-level destinations only; navigation between
- * the app's four hubs: Home, Layouts, Devices, Settings.
+ * the app's three hubs: Home, Devices, Settings.
  *
  * Bottom navigation was chosen over a side drawer: this is a one-handed
  * controller app used in portrait AND landscape — thumb-reachable tabs
@@ -38,7 +38,6 @@ data class DockItem(val route: String, val label: String, val icon: AppIcon)
 
 val DockItems = listOf(
     DockItem("home", "Home", AppIcon.HOME),
-    DockItem("layouts", "Layouts", AppIcon.LAYOUTS),
     DockItem("devices", "Devices", AppIcon.DEVICES),
     DockItem("settings", "Settings", AppIcon.SETTINGS)
 )

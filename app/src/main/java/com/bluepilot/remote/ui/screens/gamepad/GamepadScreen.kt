@@ -53,7 +53,6 @@ import com.bluepilot.remote.model.GamepadMappingMode
 import com.bluepilot.remote.ui.components.KeyCard
 import com.bluepilot.remote.ui.components.NotConnectedBanner
 import com.bluepilot.remote.ui.components.rememberHaptic
-import com.bluepilot.remote.viewmodel.GamepadBuilderViewModel
 import com.bluepilot.remote.viewmodel.RemoteControlViewModel
 import kotlin.math.roundToInt
 
@@ -66,10 +65,8 @@ import kotlin.math.roundToInt
 @Composable
 fun GamepadScreen(
     onBack: () -> Unit,
-    // UI/UX v2.1 — Pad Builder is now an OPTION of the Gamepad hub.
-    onOpenBuilder: () -> Unit = {},
-    /** GTA presets — opens the builder player on a seeded preset key. */
-    onOpenPreset: (String) -> Unit = {},
+    // UI/UX v2.1 — Pad Builder is now an OPTION of the Gamepad hub. = {},
+    /** GTA presets — opens the builder player on a seeded preset key. */ = {},
     viewModel: RemoteControlViewModel = hiltViewModel()
 ) {
     val isConnected by viewModel.isConnected.collectAsState()
@@ -98,30 +95,6 @@ fun GamepadScreen(
                         onClick = onOpenBuilder,
                         label = { Text("Pad Builder") }
                     )
-                    // GTA presets (user-picked Designs 10 + 13) in a ⋮ menu.
-                    var menuOpen by remember { mutableStateOf(false) }
-                    IconButton(onClick = { menuOpen = true }) {
-                        Icon(Icons.Rounded.MoreVert, contentDescription = "More options")
-                    }
-                    androidx.compose.material3.DropdownMenu(
-                        expanded = menuOpen,
-                        onDismissRequest = { menuOpen = false }
-                    ) {
-                        androidx.compose.material3.DropdownMenuItem(
-                            text = { Text("GTA Comfort Grip") },
-                            onClick = {
-                                menuOpen = false
-                                onOpenPreset(GamepadBuilderViewModel.PRESET_GTA_COMFORT)
-                            }
-                        )
-                        androidx.compose.material3.DropdownMenuItem(
-                            text = { Text("GTA Obsidian 3D") },
-                            onClick = {
-                                menuOpen = false
-                                onOpenPreset(GamepadBuilderViewModel.PRESET_GTA_OBSIDIAN)
-                            }
-                        )
-                    }
                     Spacer(Modifier.width(6.dp))
                 }
             )

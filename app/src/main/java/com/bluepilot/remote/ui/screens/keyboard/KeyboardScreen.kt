@@ -54,7 +54,6 @@ fun KeyboardScreen(
     // UI/UX v2.1 — Full Board + PC Combo are now OPTIONS of the Keyboard
     // hub (top-bar chips) instead of separate home tiles.
     onOpenFullBoard: () -> Unit = {},
-    onOpenPcCombo: () -> Unit = {},
     viewModel: RemoteControlViewModel = hiltViewModel()
 ) {
     val isConnected by viewModel.isConnected.collectAsState()
@@ -62,7 +61,6 @@ fun KeyboardScreen(
     val vibration by viewModel.vibrationsEnabled.collectAsState()
     val haptic = rememberHaptic(vibration)
     var text by remember { mutableStateOf("") }
-    var showVoiceSheet by remember { mutableStateOf(false) }   // ADV S4
 
     Scaffold(
         containerColor = androidx.compose.ui.graphics.Color.Transparent,
@@ -79,11 +77,6 @@ fun KeyboardScreen(
                     androidx.compose.material3.AssistChip(
                         onClick = onOpenFullBoard,
                         label = { Text("Full board") }
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    androidx.compose.material3.AssistChip(
-                        onClick = onOpenPcCombo,
-                        label = { Text("PC combo") }
                     )
                     Spacer(Modifier.width(6.dp))
                 }
@@ -109,14 +102,6 @@ fun KeyboardScreen(
                         placeholder = { Text("Type here, send to PC…") },
                         singleLine = true
                     )
-                    // ADV S4 — voice-to-text entry point.
-                    IconButton(onClick = { showVoiceSheet = true }) {
-                        Icon(
-                            Icons.Rounded.Mic,
-                            contentDescription = "Voice input",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
                     IconButton(onClick = {
                         haptic()
                         viewModel.typeText(text)
@@ -291,10 +276,6 @@ fun KeyboardScreen(
         }
     }
 
-    // ADV S4 — voice input sheet.
-    if (showVoiceSheet) {
-        com.bluepilot.remote.ui.components.VoiceInputSheet(onDismiss = { showVoiceSheet = false })
-    }
 }
 
 @Composable

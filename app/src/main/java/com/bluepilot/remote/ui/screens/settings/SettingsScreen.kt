@@ -60,8 +60,6 @@ import com.bluepilot.remote.viewmodel.SettingsViewModel
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
-    onOpenThemes: () -> Unit = {},
-    onOpen3DPreview: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val app by viewModel.app.collectAsState()
@@ -105,25 +103,6 @@ fun SettingsScreen(
 
             // ---------- General ----------
             if (matches("theme", "fullscreen", "screen", "vibration", "secure", "gallery", "motion", "3d", "icon", "pack")) SettingsGroup("General") {
-                OutlinedButton(
-                    onClick = onOpenThemes,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = androidx.compose.material3.ButtonDefaults.outlinedButtonColors(
-                        contentColor = spec.primary
-                    ),
-                    border = androidx.compose.foundation.BorderStroke(
-                        width = 1.dp,
-                        color = spec.primary.copy(alpha = 0.5f)
-                    )
-                ) {
-                    Text(
-                        text = if (spec.monoFont) "OPEN THEME GALLERY" else "Open theme gallery",
-                        style = if (spec.monoFont) MaterialTheme.typography.labelLarge.copy(fontFamily = FontFamily.Monospace)
-                        else MaterialTheme.typography.labelLarge
-                    )
-                }
-                Spacer(Modifier.height(12.dp))
                 Text(
                     text = if (spec.monoFont) "THEME" else "Theme",
                     style = if (spec.monoFont) MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
@@ -186,9 +165,6 @@ fun SettingsScreen(
                         )
                     }
                 }
-                // AUDIT FIX: the 3D showcase screen existed but was
-                // unreachable — this button was never rendered.
-                TextButton(onClick = onOpen3DPreview) { Text("Open 3D effects preview") }
                 Text("Icon pack", style = MaterialTheme.typography.bodyMedium)
                 Row(modifier = Modifier.padding(vertical = 4.dp)) {
                     listOf("FILLED", "OUTLINED", "ROUNDED", "SHARP").forEach { pack ->
@@ -201,22 +177,10 @@ fun SettingsScreen(
                     }
                 }
                 ToggleRow(
-                    "FPS overlay",
-                    app.fpsOverlay,
-                    viewModel::setFpsOverlay,
-                    subtitle = "Real-time frame rate in the corner (measured, Choreographer)"
-                )
-                ToggleRow(
                     "Reconnect on launch",
                     app.autoReconnectLast,
                     viewModel::setAutoReconnectLast,
-                    subtitle = "Auto-connect to your most recent host when the app opens (WiFi needs a remembered PIN)"
-                )
-                ToggleRow(
-                    "Automation API (Tasker)",
-                    app.automationApi,
-                    viewModel::setAutomationApi,
-                    subtitle = "Let automation apps play macros, media keys and type text via broadcast. Off = all external commands dropped."
+                    subtitle = "Auto-connect to your most recent host when the app opens"
                 )
                 ToggleRow(
                     "Reduce motion",
@@ -247,44 +211,6 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-
-            // ---------- SECTION 1: Auto theme scheduling ----------
-            if (matches("theme", "auto", "schedule", "night", "day")) SettingsGroup("Auto theme schedule") {
-                ToggleRow(
-                    "Switch theme by time of day",
-                    app.autoThemeEnabled,
-                    viewModel::setAutoTheme,
-                    subtitle = "Day theme by day, night theme at night (checked every minute)"
-                )
-                ToggleRow(
-                    "Switch theme by room light",
-                    app.lightAutoTheme,
-                    viewModel::setLightAutoTheme,
-                    subtitle = "Real light sensor: dark room → night theme (overrides the clock; needs a light sensor)"
-                )
-                if (app.autoThemeEnabled) {
-                    Text("Day theme", style = MaterialTheme.typography.bodyMedium)
-                    ThemePickerRow(
-                        selectedId = app.autoDayTheme,
-                        dark = false,
-                        onPick = viewModel::setAutoDayTheme
-                    )
-                    Text("Night theme", style = MaterialTheme.typography.bodyMedium)
-                    ThemePickerRow(
-                        selectedId = app.autoNightTheme,
-                        dark = true,
-                        onPick = viewModel::setAutoNightTheme
-                    )
-                    SliderRow(
-                        "Night starts (hour)", app.autoNightStart,
-                        viewModel::setAutoNightStart, max = 23
-                    )
-                    SliderRow(
-                        "Night ends (hour)", app.autoNightEnd,
-                        viewModel::setAutoNightEnd, max = 23
-                    )
-                }
             }
 
             // ---------- Mouse ----------
@@ -446,30 +372,3 @@ private fun SliderRow(
 }
 
 /** SECTION 1 — compact theme chips for the auto-schedule pickers. */
-@Composable
-private fun ThemePickerRow(
-    selectedId: String,
-    dark: Boolean,
-    onPick: (String) -> Unit
-) {
-    val options = com.bluepilot.remote.ui.theme.BuiltInThemes.ALL.filter { it.isDark == dark }
-    LazyRow(
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
-        modifier = Modifier.padding(vertical = 4.dp)
-    ) {
-        items(options, key = { it.id }) { theme ->
-            FilterChip(
-                selected = theme.id == selectedId,
-                onClick = { onPick(theme.id) },
-                label = { Text(theme.name) },
-                leadingIcon = {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(theme.primary, CircleShape)
-                    )
-                }
-            )
-        }
-    }
-}

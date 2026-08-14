@@ -123,9 +123,6 @@ dependencies {
 
     // Persistence
     implementation(libs.datastore.preferences)
-    implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
-    ksp(libs.room.compiler)
 
     // Serialization (layout import/export)
     implementation(libs.kotlinx.serialization.json)

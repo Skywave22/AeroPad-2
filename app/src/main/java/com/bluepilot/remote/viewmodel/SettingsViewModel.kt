@@ -75,11 +75,6 @@ class SettingsViewModel @Inject constructor(
     }
 
     // SECTION 1: auto theme scheduling.
-    fun setAutoTheme(enabled: Boolean) = updateApp { it.copy(autoThemeEnabled = enabled) }
-    fun setAutoDayTheme(id: String) = updateApp { it.copy(autoDayTheme = id) }
-    fun setAutoNightTheme(id: String) = updateApp { it.copy(autoNightTheme = id) }
-    fun setAutoNightStart(hour: Int) = updateApp { it.copy(autoNightStart = hour.coerceIn(0, 23)) }
-    fun setAutoNightEnd(hour: Int) = updateApp { it.copy(autoNightEnd = hour.coerceIn(0, 23)) }
     fun setFullscreen(value: Boolean) = updateApp { it.copy(fullscreenMode = value) }
     fun setKeepScreenOn(value: Boolean) = updateApp { it.copy(keepScreenOn = value) }
     fun setTouchVibrations(value: Boolean) = updateApp { it.copy(touchVibrations = value) }
@@ -89,9 +84,6 @@ class SettingsViewModel @Inject constructor(
     fun setReduceMotion(value: Boolean) = updateApp { it.copy(reduceMotion = value) }
     fun setIconPack(value: String) = updateApp { it.copy(iconPack = value) }
     fun setQuality3D(value: String) = updateApp { it.copy(quality3D = value) }
-    fun setFpsOverlay(value: Boolean) = updateApp { it.copy(fpsOverlay = value) }   // V2 A5
-    fun setAutomationApi(value: Boolean) = updateApp { it.copy(automationApi = value) }   // V2 M8 b2
-    fun setLightAutoTheme(value: Boolean) = updateApp { it.copy(lightAutoTheme = value) }   // V2 M3
     fun setSpokenAlerts(value: Boolean) = updateApp { it.copy(spokenAlerts = value) }   // V2 M5 b2
     fun setAutoReconnectLast(value: Boolean) = updateApp { it.copy(autoReconnectLast = value) }   // V2 M4 b2
 

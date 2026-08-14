@@ -37,16 +37,10 @@ data class AppSettings(
     val recentThemes: String = "",
     /** Favorite/pinned theme ids, CSV. */
     val favoriteThemes: String = "",
-    /** Auto theme scheduling: switch by time of day. */
-    val autoThemeEnabled: Boolean = false,
     /** Theme id used during the day window. */
-    val autoDayTheme: String = "stitch_glass_light",
     /** Theme id used during the night window. */
-    val autoNightTheme: String = "obsidian_3d",
     /** Night window start hour 0..23 (default 19:00). */
-    val autoNightStart: Int = 19,
     /** Night window end hour 0..23 (default 07:00). */
-    val autoNightEnd: Int = 7,
 
     // ----- ADV SECTION 3 (gamepad profile enhancements) -----
     /** Favorite gamepad profile row-ids, CSV. */
@@ -54,13 +48,10 @@ data class AppSettings(
     /** Recently played gamepad profile row-ids, newest first, CSV (max 6). */
     val recentGamepads: String = "",
     /** V2 PART A — real-time FPS overlay (debug/power-user toggle). */
-    val fpsOverlay: Boolean = false,
     /** V2 MATRIX 8 b2 — allow external automation apps (Tasker etc.) to
      *  send commands via broadcast. SECURITY: default OFF. */
-    val automationApi: Boolean = false,
     /** V2 MATRIX 3 finale — ambient light sensor picks day/night theme
      *  (overrides clock scheduling while enabled; hysteresis-gated). */
-    val lightAutoTheme: Boolean = false,
     /** V2 MATRIX 5 b2 — speak connect/disconnect events through the active
      *  screen reader (announceForAccessibility — a no-op without one). */
     val spokenAlerts: Boolean = true,

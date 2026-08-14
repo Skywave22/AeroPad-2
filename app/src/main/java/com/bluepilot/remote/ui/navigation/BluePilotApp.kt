@@ -7,94 +7,57 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavType
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.bluepilot.remote.ui.components.GlassDock
-import com.bluepilot.remote.ui.components.OnboardingOverlay
-import com.bluepilot.remote.viewmodel.SettingsViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import com.bluepilot.remote.ui.components.GlassDock
+import com.bluepilot.remote.ui.components.OnboardingOverlay
 import com.bluepilot.remote.ui.screens.connection.ConnectionScreen
 import com.bluepilot.remote.ui.screens.devices.DevicesScreen
-import com.bluepilot.remote.ui.screens.home.HomeScreen
-import com.bluepilot.remote.ui.screens.permission.PermissionScreen
-import com.bluepilot.remote.ui.screens.gamepad.GamepadScreen
 import com.bluepilot.remote.ui.screens.fullkeyboard.FullKeyboardScreen
-import com.bluepilot.remote.ui.screens.airmouse.AirMouseScreen
-import com.bluepilot.remote.ui.screens.pccombo.PcComboScreen
-import com.bluepilot.remote.ui.screens.preview3d.Preview3DScreen
-import com.bluepilot.remote.ui.screens.gamepadbuilder.GamepadBuilderScreen
-import com.bluepilot.remote.ui.screens.health.ConnectionHealthScreen
+import com.bluepilot.remote.ui.screens.gamepad.GamepadScreen
 import com.bluepilot.remote.ui.screens.help.HelpScreen
+import com.bluepilot.remote.ui.screens.home.HomeScreen
 import com.bluepilot.remote.ui.screens.keyboard.KeyboardScreen
-import com.bluepilot.remote.ui.screens.editor.LayoutEditorScreen
-import com.bluepilot.remote.ui.screens.layouts.LayoutsScreen
-import com.bluepilot.remote.ui.screens.macros.MacrosScreen
 import com.bluepilot.remote.ui.screens.mouse.MouseScreen
 import com.bluepilot.remote.ui.screens.multimedia.MultimediaScreen
-import com.bluepilot.remote.ui.screens.numpad.NumpadScreen
+import com.bluepilot.remote.ui.screens.permission.PermissionScreen
 import com.bluepilot.remote.ui.screens.presenter.PresenterScreen
 import com.bluepilot.remote.ui.screens.settings.SettingsScreen
-import com.bluepilot.remote.ui.screens.themes.ThemeGalleryScreen
+import com.bluepilot.remote.viewmodel.SettingsViewModel
 
 /**
- * Central navigation graph.
+ * Central navigation graph — lean core build.
  *
- * Routes are type-safe constants in [Routes]. Each module adds its own
- * destinations here (Module 2: permission/connection/devices/scanner,
- * Module 4: control screens, Module 6: layout editor, Module 7: combo profiles).
+ * Control surfaces: Mouse, Keyboard (+full board), Multimedia, Presenter,
+ * Gamepad. Setup: Connect, Devices, Settings, Help.
  */
 object Routes {
     const val HOME = "home"
-    // Placeholders — implemented in later modules:
     const val PERMISSIONS = "permissions"
     const val CONNECTION = "connection"
     const val DEVICES = "devices"
-    const val SCANNER = "scanner"
     const val MOUSE = "mouse"
     const val KEYBOARD = "keyboard"
-    const val NUMPAD = "numpad"
     const val MULTIMEDIA = "multimedia"
     const val PRESENTER = "presenter"
     const val GAMEPAD = "gamepad"
     const val SETTINGS = "settings"
     const val HELP = "help"
-    const val LAYOUTS = "layouts"
-    const val LAYOUT_EDITOR = "layout_editor"
-    const val COMBO_PROFILES = "combo_profiles"
-    const val MACROS = "macros"
-    const val THEMES = "themes"
-    const val GAMEPAD_BUILDER = "gamepad_builder"
-    /** GTA presets — builder in instant-play mode for a seeded preset. */
-    const val GAMEPAD_PRESET = "gamepad_preset"
     const val FULL_KEYBOARD = "full_keyboard"
-    const val PC_COMBO = "pc_combo"
-    const val AIR_MOUSE = "air_mouse"
-    const val PREVIEW_3D = "preview_3d"
-    const val CONNECTION_HEALTH = "connection_health"
-    const val WIFI_CONNECT = "wifi_connect"
 }
 
 @Composable
 fun BluePilotApp(
-    /** V2 MATRIX 8 — start destination override (launcher shortcuts). */
     startRoute: String = Routes.HOME
 ) {
     val navController = rememberNavController()
@@ -103,17 +66,15 @@ fun BluePilotApp(
     val backStack by navController.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
 
-    // UI/UX redesign: dock shows only on the four top-level hubs so control
-    // surfaces (mouse/keyboard/gamepad...) keep the full screen.
-    val dockRoutes = setOf(Routes.HOME, Routes.LAYOUTS, Routes.DEVICES, Routes.SETTINGS)
+    // Dock shows only on the top-level hubs so control surfaces keep the
+    // full screen.
+    val dockRoutes = setOf(Routes.HOME, Routes.DEVICES, Routes.SETTINGS)
 
-    // V2 MATRIX 5 b2 — spoken connection alerts: connect/disconnect events
-    // are announced through the active screen reader. Uses the platform
-    // announceForAccessibility — literally a no-op when TalkBack is off,
-    // so there is zero behavior change for sighted users. Toggleable.
+    // Spoken connection alerts through the active screen reader (no-op when
+    // TalkBack is off). Toggleable in Settings.
     if (appSettings.spokenAlerts) {
-        val healthVm: com.bluepilot.remote.viewmodel.ConnectionHealthViewModel = hiltViewModel()
-        val connState by healthVm.connection.collectAsState()
+        val connVm: com.bluepilot.remote.viewmodel.ConnectionViewModel = hiltViewModel()
+        val connState by connVm.connectionState.collectAsState()
         val view = androidx.compose.ui.platform.LocalView.current
         var lastAnnounced by androidx.compose.runtime.remember {
             androidx.compose.runtime.mutableStateOf<String?>(null)
@@ -126,8 +87,6 @@ fun BluePilotApp(
                     "Connection lost"
                 else -> null
             }
-            // Announce only real transitions (not recompositions/app start
-            // replays of the same state).
             if (message != null && message != lastAnnounced) {
                 lastAnnounced = message
                 view.announceForAccessibility(message)
@@ -138,9 +97,8 @@ fun BluePilotApp(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-    // SECTION 3D — card-flip screen transitions: incoming screen rotates in
-    // around the Y axis (12° -> 0°) with a slide, like turning a card.
-    // Under Reduce Motion this collapses to a plain fast fade.
+    // Card-flip screen transitions; collapses to a fast fade under
+    // Reduce Motion.
     val reduceMotion = com.bluepilot.remote.ui.components.LocalReduceMotion.current
     val flipIn = scaleIn(tween(280), initialScale = 0.92f) + fadeIn(tween(280)) +
         slideInHorizontally(tween(280)) { it / 5 }
@@ -185,76 +143,33 @@ fun BluePilotApp(
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(
-                onBack = { navController.popBackStack() },
-                onOpenThemes = { navController.navigate(Routes.THEMES) },
-                onOpen3DPreview = { navController.navigate(Routes.PREVIEW_3D) }
+                onBack = { navController.popBackStack() }
             )
         }
         composable(Routes.MOUSE) { MouseScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.KEYBOARD) {
             KeyboardScreen(
                 onBack = { navController.popBackStack() },
-                onOpenFullBoard = { navController.navigate(Routes.FULL_KEYBOARD) },
-                onOpenPcCombo = { navController.navigate(Routes.PC_COMBO) }
+                onOpenFullBoard = { navController.navigate(Routes.FULL_KEYBOARD) }
             )
         }
-        composable(Routes.NUMPAD) { NumpadScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.MULTIMEDIA) {
             MultimediaScreen(
                 onBack = { navController.popBackStack() },
-                onOpenPresenter = { navController.navigate(Routes.PRESENTER) },
-                onOpenNumpad = { navController.navigate(Routes.NUMPAD) }
+                onOpenPresenter = { navController.navigate(Routes.PRESENTER) }
             )
         }
         composable(Routes.PRESENTER) { PresenterScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.GAMEPAD) {
             GamepadScreen(
-                onBack = { navController.popBackStack() },
-                onOpenBuilder = { navController.navigate(Routes.GAMEPAD_BUILDER) },
-                onOpenPreset = { key -> navController.navigate("${Routes.GAMEPAD_PRESET}/$key") }
+                onBack = { navController.popBackStack() }
             )
-        }
-        composable(Routes.WIFI_CONNECT) {
-            com.bluepilot.remote.ui.screens.wifi.WifiConnectScreen(onBack = { navController.popBackStack() })
-        }
-        composable(Routes.CONNECTION_HEALTH) {
-            ConnectionHealthScreen(onBack = { navController.popBackStack() })
         }
         composable(Routes.HELP) { HelpScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.LAYOUTS) {
-            LayoutsScreen(
-                onBack = { navController.popBackStack() },
-                onEdit = { id -> navController.navigate("${Routes.LAYOUT_EDITOR}/$id") }
-            )
-        }
-        composable(Routes.MACROS) { MacrosScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.THEMES) { ThemeGalleryScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.GAMEPAD_BUILDER) { GamepadBuilderScreen(onBack = { navController.popBackStack() }) }
-        composable(
-            route = "${Routes.GAMEPAD_PRESET}/{presetKey}",
-            arguments = listOf(navArgument("presetKey") { type = NavType.StringType })
-        ) { entry ->
-            GamepadBuilderScreen(
-                onBack = { navController.popBackStack() },
-                presetKey = entry.arguments?.getString("presetKey")
-            )
-        }
         composable(Routes.FULL_KEYBOARD) { FullKeyboardScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.PC_COMBO) { PcComboScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.AIR_MOUSE) { AirMouseScreen(onBack = { navController.popBackStack() }) }
-        composable(Routes.PREVIEW_3D) { Preview3DScreen(onBack = { navController.popBackStack() }) }
-        composable(
-            route = "${Routes.LAYOUT_EDITOR}/{profileId}",
-            arguments = listOf(navArgument("profileId") { type = NavType.LongType })
-        ) {
-            LayoutEditorScreen(onBack = { navController.popBackStack() })
-        }
-        // Layout editor (Module 6) and combo profiles (Module 7) append here.
     }
 
-    // Floating glass dock — hubs only. UI/UX v2.1: animated slide in/out
-    // (auto-hides the moment any control section opens, slides back on
-    // return) instead of popping in and out.
+    // Floating glass dock — hubs only.
     androidx.compose.animation.AnimatedVisibility(
         visible = currentRoute in dockRoutes,
         enter = androidx.compose.animation.slideInVertically(tween(220)) { it } +
@@ -275,76 +190,10 @@ fun BluePilotApp(
         )
     }
 
-    // ADV S5 — persistent mini health indicator (real classification),
-    // top-right corner during active use; tap opens the dashboard.
-    if (currentRoute != Routes.CONNECTION_HEALTH) {
-        MiniHealthIndicator(
-            onOpen = { navController.navigate(Routes.CONNECTION_HEALTH) },
-            modifier = Modifier.align(Alignment.TopEnd)
-        )
-    }
-
-    // UI/UX v2.1 — privacy-blank 👁 button removed per user feedback
-    // (cluttered the corner on every screen; feature rarely used).
-
-    // V2 PART A — real FPS overlay (Choreographer-measured); toggle in
-    // Settings. Lifecycle-safe: stops measuring the moment it's disabled.
-    if (appSettings.fpsOverlay) {
-        androidx.compose.runtime.DisposableEffect(Unit) {
-            com.bluepilot.remote.perf.FrameStats.start()
-            onDispose { com.bluepilot.remote.perf.FrameStats.stop() }
-        }
-        val frameStats by com.bluepilot.remote.perf.FrameStats.stats.collectAsState()
-        androidx.compose.material3.Text(
-            text = "${frameStats.fps} fps" +
-                if (frameStats.jankPercent > 0) " • ${frameStats.jankPercent}% jank" else "",
-            color = when {
-                frameStats.jankPercent > 20 -> androidx.compose.ui.graphics.Color(0xFFE74C3C)
-                frameStats.jankPercent > 5 -> androidx.compose.ui.graphics.Color(0xFFF1C40F)
-                else -> androidx.compose.ui.graphics.Color(0xFF2ECC71)
-            },
-            style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(top = 42.dp, start = 12.dp)
-                .background(
-                    androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.45f),
-                    androidx.compose.foundation.shape.RoundedCornerShape(6.dp)
-                )
-                .padding(horizontal = 6.dp, vertical = 2.dp)
-        )
-    }
-
     // First-run tutorial overlay
     OnboardingOverlay(
         visible = !appSettings.onboardingDone,
         onFinish = { settingsViewModel.setOnboardingDone() }
     )
     } // Box
-}
-
-/**
- * ADV S5 — tiny always-available health dot (only rendered when connected).
- * Real classification from measured metrics; tap opens the dashboard.
- */
-@Composable
-private fun MiniHealthIndicator(onOpen: () -> Unit, modifier: Modifier = Modifier) {
-    val vm: com.bluepilot.remote.viewmodel.ConnectionHealthViewModel = hiltViewModel()
-    val connection by vm.connection.collectAsState()
-    if (!connection.isConnected) return
-    val snapshot by vm.snapshot.collectAsState()
-    val health = com.bluepilot.remote.domain.ConnectionHealthTracker.classify(snapshot)
-    val color = when (health) {
-        com.bluepilot.remote.domain.ConnectionHealthTracker.Health.GOOD -> androidx.compose.ui.graphics.Color(0xFF2ECC71)
-        com.bluepilot.remote.domain.ConnectionHealthTracker.Health.FAIR -> androidx.compose.ui.graphics.Color(0xFFF1C40F)
-        com.bluepilot.remote.domain.ConnectionHealthTracker.Health.POOR -> androidx.compose.ui.graphics.Color(0xFFE74C3C)
-    }
-    androidx.compose.foundation.layout.Box(
-        modifier = modifier
-            .padding(top = 42.dp, end = 10.dp)
-            .size(12.dp)
-            .background(color, androidx.compose.foundation.shape.CircleShape)
-            .border(1.dp, androidx.compose.ui.graphics.Color.White.copy(alpha = 0.6f), androidx.compose.foundation.shape.CircleShape)
-            .clickable { onOpen() }
-    )
 }

@@ -11,7 +11,7 @@ class ShortcutActionsTest {
     fun `known actions map to their screens`() {
         assertEquals("full_keyboard", ShortcutActions.routeFor(ShortcutActions.OPEN_KEYBOARD))
         assertEquals("mouse", ShortcutActions.routeFor(ShortcutActions.OPEN_MOUSE))
-        assertEquals("gamepad_builder", ShortcutActions.routeFor(ShortcutActions.OPEN_GAMEPAD))
+        assertEquals("gamepad", ShortcutActions.routeFor(ShortcutActions.OPEN_GAMEPAD))
         assertEquals("multimedia", ShortcutActions.routeFor(ShortcutActions.OPEN_MEDIA))
     }
 
@@ -31,7 +31,7 @@ class ShortcutActionsTest {
         val valid = setOf(
             com.bluepilot.remote.ui.navigation.Routes.FULL_KEYBOARD,
             com.bluepilot.remote.ui.navigation.Routes.MOUSE,
-            com.bluepilot.remote.ui.navigation.Routes.GAMEPAD_BUILDER,
+            com.bluepilot.remote.ui.navigation.Routes.GAMEPAD,
             com.bluepilot.remote.ui.navigation.Routes.MULTIMEDIA,
             com.bluepilot.remote.ui.navigation.Routes.HOME
         )

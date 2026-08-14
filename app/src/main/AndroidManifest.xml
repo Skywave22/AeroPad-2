@@ -24,7 +24,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <!-- ADV S4: voice-to-text — used only during active dictation sessions. -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- AEROPAD v1.0: WiFi LAN control (local sockets + mDNS discovery). -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -65,17 +64,6 @@
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />
 
-        <!-- V2 MATRIX 8 b2: Tasker/automation API. Exported so external
-             automation apps can reach it, but EVERY command is dropped
-             unless the user enables the "Automation API" Settings toggle
-             (default OFF) — see AutomationReceiver security model. -->
-        <receiver
-            android:name=".service.AutomationReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.bluepilot.remote.AUTOMATION" />
-            </intent-filter>
-        </receiver>
 
         <!-- V2 MATRIX 8: Quick Settings tile — media toggle / open app -->
         <service

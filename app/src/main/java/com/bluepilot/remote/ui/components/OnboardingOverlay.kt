@@ -44,9 +44,9 @@ private val steps = listOf(
     OnboardStep("🖱️", "Mouse, keyboard & more",
         "Trackpad with gestures, full PC keyboard, numpad, media remote, presenter and gamepad — all ready out of the box."),
     OnboardStep("🎨", "Make it yours",
-        "Build custom layouts and gamepads with the editors, record macros, and switch the entire look in Themes — 13 designs included."),
+        "Use the trackpad, keyboard, media remote, presenter and gamepad — everything runs over Bluetooth HID, no software needed on the PC."),
     OnboardStep("⚡", "Pro tips",
-        "Long-press a trackpad for right-click. Swipe the top bar in a layout to switch profiles. Record macros from ANY screen via Macros → Record.")
+        "Long-press the trackpad for right-click. Two-finger swipe scrolls. Pin the app in Settings to keep the connection alive.")
 )
 
 @Composable
