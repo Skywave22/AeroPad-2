@@ -31,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -51,7 +52,7 @@ import com.bluepilot.remote.viewmodel.RemoteControlViewModel
  *  - Transport row: 64dp rounded-xl side buttons, STOP is 80dp in the
  *    error tint (exact widths from the HTML: w-16 / w-20).
  *  - Live status pill with a glowing dot (shadow-[0_0_8px]).
- *  - Link rows to Presenter/Numpad with 40dp icon coins
+ *  - Link row to Presenter with 40dp icon coins
  *    (`w-10 h-10 rounded-lg bg-surface-container`).
  * All colors come from the theme spec so Obsidian 3D and Glass Light
  * both render exactly like their PNGs.
@@ -61,7 +62,6 @@ import com.bluepilot.remote.viewmodel.RemoteControlViewModel
 fun MultimediaScreen(
     onBack: () -> Unit,
     onOpenPresenter: () -> Unit = {},
-    onOpenNumpad: () -> Unit = {},
     viewModel: RemoteControlViewModel = hiltViewModel()
 ) {
     val isConnected by viewModel.isConnected.collectAsState()
@@ -178,7 +178,6 @@ fun MultimediaScreen(
                         }
                     }
                     LinkRow("📽", "Presenter mode", spec, onOpenPresenter)
-                    LinkRow("🔢", "Numpad", spec, onOpenNumpad)
                 }
             }
             return@Scaffold
@@ -257,11 +256,36 @@ fun MultimediaScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                TransportKey("Vol −", 64.dp, spec, wide = true, modifier = Modifier.weight(1f)) {
-                    haptic(); viewModel.mediaTap(HidConsumer.VOLUME_DOWN)
+                TransportKey(
+                    "Vol −", 64.dp, spec, wide = true, modifier = Modifier.weight(1f),
+                    onHoldStart = { haptic(); viewModel.mediaRepeatStart(HidConsumer.VOLUME_DOWN) },
+                    onHoldStop = { viewModel.mediaRepeatStop() }
+                ) { }
+                TransportKey(
+                    "Vol +", 64.dp, spec, wide = true, modifier = Modifier.weight(1f),
+                    onHoldStart = { haptic(); viewModel.mediaRepeatStart(HidConsumer.VOLUME_UP) },
+                    onHoldStop = { viewModel.mediaRepeatStop() }
+                ) { }
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            // FEATURE: PC power controls (HID system page — real sleep/wake).
+            Text(
+                "PC POWER",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(6.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                TransportKey("😴 Sleep", 52.dp, spec, wide = true, modifier = Modifier.weight(1f)) {
+                    haptic(); viewModel.systemTap(com.bluepilot.remote.model.HidSystem.SLEEP)
                 }
-                TransportKey("Vol +", 64.dp, spec, wide = true, modifier = Modifier.weight(1f)) {
-                    haptic(); viewModel.mediaTap(HidConsumer.VOLUME_UP)
+                TransportKey("⏰ Wake", 52.dp, spec, wide = true, modifier = Modifier.weight(1f)) {
+                    haptic(); viewModel.systemTap(com.bluepilot.remote.model.HidSystem.WAKE)
                 }
             }
             Spacer(Modifier.height(18.dp))
@@ -269,7 +293,6 @@ fun MultimediaScreen(
             // ---------- Link rows (w-10 h-10 rounded-lg icon coins) ----------
             LinkRow("📽", "Presenter mode", spec, onOpenPresenter)
             Spacer(Modifier.height(8.dp))
-            LinkRow("🔢", "Numpad", spec, onOpenNumpad)
             Spacer(Modifier.height(90.dp))
         }
     }
@@ -283,9 +306,25 @@ private fun TransportKey(
     error: Boolean = false,
     wide: Boolean = false,
     modifier: Modifier = Modifier,
+    /** FEATURE: hold-to-repeat — when set, press-and-hold repeats. */
+    onHoldStart: (() -> Unit)? = null,
+    onHoldStop: (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
     val tint = if (error) spec.error else MaterialTheme.colorScheme.onSurfaceVariant
+    val interaction = if (onHoldStart != null) {
+        Modifier.pointerInput(Unit) {
+            androidx.compose.foundation.gestures.detectTapGestures(
+                onPress = {
+                    onHoldStart()
+                    tryAwaitRelease()
+                    onHoldStop?.invoke()
+                }
+            )
+        }
+    } else {
+        Modifier.clickable(onClick = onClick)
+    }
     Box(
         modifier = modifier
             .then(if (wide) Modifier.height(keySize) else Modifier.size(keySize))
@@ -298,7 +337,7 @@ private fun TransportKey(
                 if (error) spec.error.copy(alpha = 0.4f) else spec.outline,
                 RoundedCornerShape(12.dp)
             )
-            .clickable(onClick = onClick),
+            .then(interaction),
         contentAlignment = Alignment.Center
     ) {
         Text(label, fontSize = if (label.length <= 2) 26.sp else 14.sp, color = tint)

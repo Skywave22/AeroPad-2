@@ -6,11 +6,12 @@ Built 100% in Kotlin + Jetpack Compose, MVVM + Clean Architecture, Hilt, DataSto
 
 ## Features
 
-- **Mouse** — trackpad with tap-click, double-tap, long-press right-click, scroll strip, L/M/R buttons; sensitivity, smoothing, pen mode, tap-to-click, invert scroll all tunable.
-- **Keyboard** — text-send bar with history, shortcuts (copy/paste/cut/select-all/save/undo/redo), F1–F12, arrows + navigation cluster, combos (Alt+Tab, Alt+F4, Win+D, Win+L, Ctrl+Shift+Esc), plus a full on-screen keyboard.
-- **Multimedia** — play/pause, stop, tracks, volume, mute, brightness.
-- **Presenter** — big prev/next, start/from-here, black/white screen, end.
+- **Mouse** — trackpad with tap-click, double-tap, long-press right-click, **real two-finger scroll**, scroll strip, L/M/R buttons, precision mode, drag lock; sensitivity, smoothing, pen mode, tap-to-click, invert scroll all tunable.
+- **Keyboard** — text-send bar with history, **quick snippets** (long-press send to save a phrase, one tap to type it), shortcuts (copy/paste/cut/select-all/save/undo/redo), F1–F12, arrows **with hold-to-repeat**, navigation cluster, extended combo pack (Alt+Tab, Win+Shift+S screenshot, browser tabs, task view…), plus a full on-screen keyboard.
+- **Multimedia** — play/pause, stop, tracks, **hold-to-repeat volume ramp**, mute, brightness, and **PC power controls** (sleep/wake).
+- **Presenter** — big prev/next, start/from-here, black/white screen, end, and a **built-in presentation timer**.
 - **Gamepad** — virtual stick + D-pad + ABXY + shoulders; three modes: real HID gamepad, keyboard fallback, mouse+keyboard hybrid; sensitivity + dead-zone tuning.
+- **Home quick-connect** — saved PCs appear as one-tap connect chips the moment you open the app.
 
 ### Connection
 - Real Bluetooth HID Device — works with Windows, macOS, Linux, Android/Google TV, most smart TVs.

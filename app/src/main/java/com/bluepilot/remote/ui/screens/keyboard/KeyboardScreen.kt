@@ -3,10 +3,12 @@ package com.bluepilot.remote.ui.screens.keyboard
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -32,6 +34,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.bluepilot.remote.model.HidKeys
@@ -102,16 +106,35 @@ fun KeyboardScreen(
                         placeholder = { Text("Type here, send to PC…") },
                         singleLine = true
                     )
-                    IconButton(onClick = {
-                        haptic()
-                        viewModel.typeText(text)
-                        text = ""
-                    }) {
-                        Icon(
-                            Icons.AutoMirrored.Rounded.Send,
-                            contentDescription = "Send text",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                    run {
+                        val settingsVm: com.bluepilot.remote.viewmodel.SettingsViewModel =
+                            androidx.hilt.navigation.compose.hiltViewModel()
+                        Box(
+                            modifier = Modifier
+                                .pointerInput(text) {
+                                    androidx.compose.foundation.gestures.detectTapGestures(
+                                        onTap = {
+                                            haptic()
+                                            viewModel.typeText(text)
+                                            text = ""
+                                        },
+                                        onLongPress = {
+                                            // FEATURE: long-press send = save as snippet
+                                            if (text.isNotBlank()) {
+                                                haptic()
+                                                settingsVm.addSnippet(text)
+                                            }
+                                        }
+                                    )
+                                }
+                                .padding(12.dp)
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Rounded.Send,
+                                contentDescription = "Send text (long-press to save snippet)",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
                 // AEROPAD v1.0 #12 — sent-text history (tap to resend).
@@ -178,6 +201,49 @@ fun KeyboardScreen(
                 }
             }
 
+            // ---------- FEATURE: Quick snippets ----------
+            SectionLabel("Snippets")
+            run {
+                val settingsVm: com.bluepilot.remote.viewmodel.SettingsViewModel =
+                    androidx.hilt.navigation.compose.hiltViewModel()
+                val app by settingsVm.app.collectAsState()
+                val snippets = remember(app.quickSnippets) {
+                    app.quickSnippets.split('\u001F').filter { it.isNotEmpty() }
+                }
+                if (snippets.isEmpty()) {
+                    Text(
+                        "Save emails, passwords hints, or any phrase you type often — long-press the send button to save the current text.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        snippets.forEach { snip ->
+                            androidx.compose.material3.InputChip(
+                                selected = false,
+                                onClick = { haptic(); viewModel.typeText(snip) },
+                                label = { Text(snip.take(24) + if (snip.length > 24) "…" else "") },
+                                trailingIcon = {
+                                    Text(
+                                        "✕",
+                                        modifier = Modifier
+                                            .padding(start = 2.dp)
+                                            .clickable { settingsVm.removeSnippet(snip) },
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+
             // ---------- Shortcuts ----------
             SectionLabel("Shortcuts")
             val ctrl = HidModifiers.LEFT_CTRL
@@ -219,13 +285,13 @@ fun KeyboardScreen(
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Spacer(Modifier.weight(1f))
-                        KeyCard("▲", modifier = Modifier.weight(1f)) { haptic(); viewModel.keyTap(HidKeys.ARROW_UP) }
+                        RepeatKeyCard("▲", Modifier.weight(1f), haptic, viewModel, HidKeys.ARROW_UP)
                         Spacer(Modifier.weight(1f))
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        KeyCard("◀", modifier = Modifier.weight(1f)) { haptic(); viewModel.keyTap(HidKeys.ARROW_LEFT) }
-                        KeyCard("▼", modifier = Modifier.weight(1f)) { haptic(); viewModel.keyTap(HidKeys.ARROW_DOWN) }
-                        KeyCard("▶", modifier = Modifier.weight(1f)) { haptic(); viewModel.keyTap(HidKeys.ARROW_RIGHT) }
+                        RepeatKeyCard("◀", Modifier.weight(1f), haptic, viewModel, HidKeys.ARROW_LEFT)
+                        RepeatKeyCard("▼", Modifier.weight(1f), haptic, viewModel, HidKeys.ARROW_DOWN)
+                        RepeatKeyCard("▶", Modifier.weight(1f), haptic, viewModel, HidKeys.ARROW_RIGHT)
                     }
                 }
                 Column(modifier = Modifier.weight(0.8f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -266,7 +332,27 @@ fun KeyboardScreen(
                             HidKeys.ESCAPE,
                             (HidModifiers.LEFT_CTRL.toInt() or HidModifiers.LEFT_SHIFT.toInt()).toByte()
                         )
-                    }
+                    },
+                    // FEATURE: extended combo pack
+                    "Win+Tab" to { viewModel.keyTap(HidKeys.TAB, HidModifiers.LEFT_GUI) },
+                    "Win+E" to { viewModel.keyTap(HidKeys.E, HidModifiers.LEFT_GUI) },
+                    "Win+Shot" to {
+                        // Win+Shift+S — Windows snip tool
+                        viewModel.keyTap(
+                            HidKeys.S,
+                            (HidModifiers.LEFT_GUI.toInt() or HidModifiers.LEFT_SHIFT.toInt()).toByte()
+                        )
+                    },
+                    "New Tab" to { viewModel.keyTap(HidKeys.T, HidModifiers.LEFT_CTRL) },
+                    "Close Tab" to { viewModel.keyTap(HidKeys.W, HidModifiers.LEFT_CTRL) },
+                    "Reopen Tab" to {
+                        viewModel.keyTap(
+                            HidKeys.T,
+                            (HidModifiers.LEFT_CTRL.toInt() or HidModifiers.LEFT_SHIFT.toInt()).toByte()
+                        )
+                    },
+                    "Find" to { viewModel.keyTap(HidKeys.F, HidModifiers.LEFT_CTRL) },
+                    "Refresh" to { viewModel.keyTap(HidKeys.F5) }
                 ),
                 columns = 3,
                 haptic = haptic
@@ -306,6 +392,46 @@ private fun KeyGrid(
                 }
                 repeat(columns - row.size) { Spacer(Modifier.weight(1f)) }
             }
+        }
+    }
+}
+
+
+/**
+ * FEATURE: hold-to-repeat key — behaves like a physical keyboard key:
+ * tap = one keystroke, press-and-hold = repeat until release.
+ */
+@Composable
+private fun RepeatKeyCard(
+    label: String,
+    modifier: Modifier,
+    haptic: () -> Unit,
+    viewModel: RemoteControlViewModel,
+    key: Byte,
+    modifiers: Byte = 0
+) {
+    androidx.compose.material3.Card(
+        modifier = modifier
+            .heightIn(min = 48.dp)
+            .pointerInput(Unit) {
+                androidx.compose.foundation.gestures.detectTapGestures(
+                    onPress = {
+                        haptic()
+                        viewModel.keyRepeatStart(key, modifiers)
+                        tryAwaitRelease()
+                        viewModel.keyRepeatStop()
+                    }
+                )
+            },
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(label, style = MaterialTheme.typography.labelLarge)
         }
     }
 }

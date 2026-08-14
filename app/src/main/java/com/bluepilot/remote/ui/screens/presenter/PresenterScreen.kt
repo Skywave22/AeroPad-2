@@ -57,6 +57,39 @@ fun PresenterScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                     }
+                },
+                actions = {
+                    // FEATURE: presentation timer — tap to start/pause,
+                    // long-press to reset. Keeps you on schedule on stage.
+                    var running by androidx.compose.runtime.remember {
+                        androidx.compose.runtime.mutableStateOf(false)
+                    }
+                    var seconds by androidx.compose.runtime.remember {
+                        androidx.compose.runtime.mutableIntStateOf(0)
+                    }
+                    androidx.compose.runtime.LaunchedEffect(running) {
+                        while (running) {
+                            kotlinx.coroutines.delay(1000)
+                            seconds++
+                        }
+                    }
+                    val mm = seconds / 60
+                    val ss = seconds % 60
+                    androidx.compose.material3.AssistChip(
+                        onClick = { running = !running },
+                        label = {
+                            Text(
+                                String.format("%s %02d:%02d", if (running) "⏸" else "▶", mm, ss),
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        },
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
+                    if (seconds > 0 && !running) {
+                        IconButton(onClick = { seconds = 0 }) {
+                            Text("↺", style = MaterialTheme.typography.titleMedium)
+                        }
+                    }
                 }
             )
         }

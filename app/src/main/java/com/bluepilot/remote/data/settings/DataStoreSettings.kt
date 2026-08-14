@@ -44,6 +44,7 @@ class DataStoreSettings @Inject constructor(
 ) : SettingsStore {
 
     private object Keys {
+        val QUICK_SNIPPETS = stringPreferencesKey("app_quick_snippets")
         // App
         val THEME = stringPreferencesKey("theme")
         val THEME_ID = stringPreferencesKey("theme_id")
@@ -104,6 +105,7 @@ class DataStoreSettings @Inject constructor(
             hapticIntensity = p[Keys.HAPTIC_INTENSITY].toEnum(HapticIntensity.MEDIUM),
             secureScreen = p[Keys.SECURE_SCREEN] ?: false,
             onboardingDone = p[Keys.ONBOARDING_DONE] ?: false,
+            quickSnippets = p[Keys.QUICK_SNIPPETS] ?: "",
             reduceMotion = p[Keys.REDUCE_MOTION] ?: false,
             iconPack = p[Keys.ICON_PACK] ?: "ROUNDED",
             quality3D = p[Keys.QUALITY_3D] ?: "FULL",
@@ -154,6 +156,7 @@ class DataStoreSettings @Inject constructor(
             p[Keys.HAPTIC_INTENSITY] = settings.hapticIntensity.name
             p[Keys.SECURE_SCREEN] = settings.secureScreen
             p[Keys.ONBOARDING_DONE] = settings.onboardingDone
+            p[Keys.QUICK_SNIPPETS] = settings.quickSnippets
             p[Keys.REDUCE_MOTION] = settings.reduceMotion
             p[Keys.ICON_PACK] = settings.iconPack
             p[Keys.QUALITY_3D] = settings.quality3D

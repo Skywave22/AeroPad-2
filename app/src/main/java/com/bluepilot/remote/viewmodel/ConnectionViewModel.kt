@@ -46,6 +46,10 @@ class ConnectionViewModel @Inject constructor(
 ) : ViewModel() {
 
     /** V2 M4 — saved-host addresses (for the ☆/★ toggle on device rows). */
+    /** FEATURE: saved hosts (full profiles) for the Home quick-connect strip. */
+    val savedHosts: StateFlow<List<com.bluepilot.remote.data.hosts.HostProfile>> =
+        hostStore.profiles
+
     val savedHostAddresses: StateFlow<Set<String>> =
         hostStore.profiles
             .map { list ->

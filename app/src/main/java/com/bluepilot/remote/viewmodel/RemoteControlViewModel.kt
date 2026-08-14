@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -138,6 +139,41 @@ class RemoteControlViewModel @Inject constructor(
     // ------------------------------------------------------------------
 
     fun mediaTap(usage: Int) = sendAction(HidAction.MediaTap(usage))
+
+    /** FEATURE: PC power controls — HID system page (sleep/wake/power). */
+    fun systemTap(bits: Byte) = sendAction(HidAction.SystemTap(bits))
+
+    // FEATURE: hold-to-repeat for media keys (volume ramp). Hold the volume
+    // button: first tap immediately, then repeats until released.
+    private var mediaRepeatJob: kotlinx.coroutines.Job? = null
+    fun mediaRepeatStart(usage: Int) {
+        mediaRepeatJob?.cancel()
+        mediaRepeatJob = viewModelScope.launch {
+            sendAction(HidAction.MediaTap(usage))
+            kotlinx.coroutines.delay(400)
+            while (true) {
+                sendAction(HidAction.MediaTap(usage))
+                kotlinx.coroutines.delay(120)
+            }
+        }
+    }
+    fun mediaRepeatStop() { mediaRepeatJob?.cancel(); mediaRepeatJob = null }
+
+    // FEATURE: hold-to-repeat for keyboard keys (arrows, backspace...).
+    // Mirrors a real keyboard: initial delay then steady repeat.
+    private var keyRepeatJob: kotlinx.coroutines.Job? = null
+    fun keyRepeatStart(key: Byte, modifiers: Byte = 0) {
+        keyRepeatJob?.cancel()
+        keyRepeatJob = viewModelScope.launch {
+            sendAction(HidAction.KeyTap(key, modifiers))
+            kotlinx.coroutines.delay(420)
+            while (true) {
+                sendAction(HidAction.KeyTap(key, modifiers))
+                kotlinx.coroutines.delay(55)
+            }
+        }
+    }
+    fun keyRepeatStop() { keyRepeatJob?.cancel(); keyRepeatJob = null }
 
     // ------------------------------------------------------------------
     // Gamepad

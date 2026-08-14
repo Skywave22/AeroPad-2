@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -158,6 +159,27 @@ fun HomeScreen(
                 }
             }
             Spacer(Modifier.height(14.dp))
+
+            // FEATURE: saved-PC quick-connect strip — your machines, one tap.
+            run {
+                val saved by viewModel.savedHosts.collectAsState()
+                if (saved.isNotEmpty() && !state.isConnected) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        saved.take(6).forEach { host ->
+                            androidx.compose.material3.AssistChip(
+                                onClick = { viewModel.connect(host.address) },
+                                label = { Text("⚡ " + host.label.take(18)) }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
+            }
 
             // ---------- Tier 1: status + daily drivers ----------
             // STITCH v3 — the signature Command Orb from designs A/B.

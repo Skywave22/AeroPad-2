@@ -55,6 +55,20 @@ class SettingsViewModel @Inject constructor(
     // ----- App -----
     fun setTheme(theme: ThemeMode) = updateApp { it.copy(theme = theme) }
 
+    // ---- FEATURE: quick text snippets ----
+    companion object { private const val SNIPPET_SEP = '\u001F'; private const val SNIPPETS_MAX = 20 }
+    fun addSnippet(text: String) = updateApp { app ->
+        val clean = text.trim().take(200)
+        if (clean.isEmpty()) return@updateApp app
+        val list = app.quickSnippets.split(SNIPPET_SEP).filter { it.isNotEmpty() }
+        if (clean in list) return@updateApp app
+        app.copy(quickSnippets = (list + clean).takeLast(SNIPPETS_MAX).joinToString(SNIPPET_SEP.toString()))
+    }
+    fun removeSnippet(text: String) = updateApp { app ->
+        val list = app.quickSnippets.split(SNIPPET_SEP).filter { it.isNotEmpty() && it != text }
+        app.copy(quickSnippets = list.joinToString(SNIPPET_SEP.toString()))
+    }
+
     /** SECTION 1: applying a theme also records it in the recents row.
      *  UX FIX: picking a theme now also sets light/dark mode to MATCH the
      *  theme — tap a dark theme, the app goes dark; tap a light theme, it

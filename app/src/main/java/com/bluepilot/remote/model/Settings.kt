@@ -25,6 +25,10 @@ data class AppSettings(
     val secureScreen: Boolean = false,
     /** First-run onboarding shown & dismissed (UI/UX redesign). */
     val onboardingDone: Boolean = false,
+    /** FEATURE: quick text snippets — user-saved phrases typed with one
+     *  tap from the Keyboard screen. Stored as unit-separator joined
+     *  string (U+001F never appears in normal text). Max 20. */
+    val quickSnippets: String = "",
     /** Disable 3D tilts/parallax/flip transitions (accessibility/battery). */
     val reduceMotion: Boolean = false,
     /** 3D quality: FULL / REDUCED / FLAT (Section 9). */

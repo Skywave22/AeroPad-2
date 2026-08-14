@@ -1,6 +1,8 @@
 package com.bluepilot.remote.ui.screens.mouse
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -117,13 +119,35 @@ fun MouseScreen(
                             )
                         }
                         .pointerInput(viewModel) {
-                            // keyed on viewModel (stable): gesture coroutine
-                            // survives recompositions -> no dropped deltas.
-                            detectDragGestures(
-                                onDragStart = { viewModel.onTrackpadGestureStart() }
-                            ) { change, dragAmount ->
-                                change.consume()
-                                viewModel.onTrackpadDelta(dragAmount.x, dragAmount.y)
+                            // FEATURE: real multi-touch trackpad.
+                            // 1 finger = move pointer, 2 fingers = scroll
+                            // (the hint always promised two-finger scroll —
+                            // now it actually works).
+                            awaitEachGesture {
+                                awaitFirstDown(requireUnconsumed = false)
+                                viewModel.onTrackpadGestureStart()
+                                var scrollAccum = 0f
+                                while (true) {
+                                    val event = awaitPointerEvent()
+                                    val pressed = event.changes.filter { it.pressed }
+                                    if (pressed.isEmpty()) break
+                                    if (pressed.size >= 2) {
+                                        // two-finger scroll: average Y delta
+                                        val dy = pressed
+                                            .map { it.position.y - it.previousPosition.y }
+                                            .average().toFloat()
+                                        scrollAccum += dy
+                                        if (kotlin.math.abs(scrollAccum) > 8f) {
+                                            viewModel.onScrollDelta(scrollAccum)
+                                            scrollAccum = 0f
+                                        }
+                                    } else {
+                                        val c = pressed.first()
+                                        val d = c.position - c.previousPosition
+                                        viewModel.onTrackpadDelta(d.x, d.y)
+                                    }
+                                    event.changes.forEach { it.consume() }
+                                }
                             }
                         }
                 ) {
