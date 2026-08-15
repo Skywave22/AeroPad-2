@@ -21,9 +21,6 @@ import androidx.compose.ui.graphics.graphicsLayer
  */
 val LocalReduceMotion = staticCompositionLocalOf { false }
 
-/** Perspective strength: lower = more dramatic. 8f ≈ subtle realistic depth. */
-private const val CAMERA_DISTANCE = 8f
-
 /**
  * 3D press-depress effect driven by a real pressed interaction state:
  * the element sinks (translationY + scale down) and tilts slightly back
@@ -33,7 +30,6 @@ private const val CAMERA_DISTANCE = 8f
 @Composable
 fun Modifier.pressDepth3D(
     interactionSource: InteractionSource,
-    maxTiltDegrees: Float = 6f,
     sinkFraction: Float = 0.04f
 ): Modifier {
     val reduceMotion = LocalReduceMotion.current || LocalQuality3D.current == Quality3D.FLAT
@@ -47,14 +43,16 @@ fun Modifier.pressDepth3D(
         }
     }
 
+    // MOTION FIX: the old spring (damping 0.55, stiffness 900) overshot on
+    // release — keys visibly wobbled after every tap. Critically damped +
+    // no rotationX (the 6° tilt distorted text on small keys) = a clean,
+    // fast sink that reads as "pressed", not "wobbling".
     val progress by animateFloatAsState(
         targetValue = if (pressed) 1f else 0f,
-        animationSpec = spring(dampingRatio = 0.55f, stiffness = 900f),
+        animationSpec = spring(dampingRatio = 1f, stiffness = 1400f),
         label = "pressDepth"
     )
     return this.graphicsLayer {
-        cameraDistance = CAMERA_DISTANCE * density
-        rotationX = -maxTiltDegrees * progress          // tip away from finger
         val s = 1f - sinkFraction * progress
         scaleX = s; scaleY = s
         translationY = size.height * sinkFraction * 0.5f * progress

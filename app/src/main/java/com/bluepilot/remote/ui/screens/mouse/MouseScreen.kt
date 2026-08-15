@@ -224,25 +224,24 @@ fun MouseScreen(
 
             Spacer(Modifier.height(12.dp))
 
-            // ---------- Mouse buttons ----------
+            // ---------- Mouse buttons (LAYOUT v3: taller, cleaner) ----------
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    .height(64.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // STITCH REDESIGN — LEFT CLICK is the accent (primary) button.
-                KeyCard("LEFT CLICK", modifier = Modifier.weight(2f), height = 56.dp, emphasized = true) {
+                KeyCard("Left", modifier = Modifier.weight(2f), height = 64.dp, emphasized = true) {
                     haptic(); viewModel.clickButton(MouseButton.LEFT)
                 }
-                KeyCard("MID", modifier = Modifier.weight(1f), height = 56.dp) {
+                KeyCard("•", modifier = Modifier.weight(0.7f), height = 64.dp) {
                     haptic(); viewModel.clickButton(MouseButton.MIDDLE)
                 }
-                KeyCard("RIGHT CLICK", modifier = Modifier.weight(2f), height = 56.dp) {
+                KeyCard("Right", modifier = Modifier.weight(2f), height = 64.dp) {
                     haptic(); viewModel.clickButton(MouseButton.RIGHT)
                 }
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(14.dp))
         }
     }
 }

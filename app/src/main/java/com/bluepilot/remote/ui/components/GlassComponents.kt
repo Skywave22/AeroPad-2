@@ -61,19 +61,11 @@ fun GlassCard(
     // whole Themes screen (and any GlassCard content) an unreadable fog on
     // Android 12+. The frosted look comes from translucency + sheen alone.
     //
-    // V2 PART B b2 — micro-tilt: cards lean ~1.5° with real device tilt
-    // (GPU graphicsLayer, draw-phase read; (0,0) tilt = perfectly flat,
-    // the exact pre-B rendering — no gate needed, zero times anything = 0).
-    val (deviceTiltX, deviceTiltY) = LocalDeviceTilt.current
+    // MOTION FIX: the micro-tilt read LocalDeviceTilt which is always
+    // (0,0) since the motion-sensor source was removed — a dead
+    // graphicsLayer evaluated on every draw. Gone.
     Box(
         modifier = modifier
-            .graphicsLayer {
-                if (deviceTiltX != 0f || deviceTiltY != 0f) {
-                    cameraDistance = 24f * density
-                    rotationY = deviceTiltX * 1.5f
-                    rotationX = deviceTiltY * 1.5f
-                }
-            }
             .background(surfaceColor, shape)
             .background(sheenBrush, shape)
             .border(borderWidth, borderBrush, shape)

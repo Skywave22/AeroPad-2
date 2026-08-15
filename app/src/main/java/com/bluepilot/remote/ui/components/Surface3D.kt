@@ -36,15 +36,6 @@ enum class Quality3D { FULL, REDUCED, FLAT }
 val LocalQuality3D = staticCompositionLocalOf { Quality3D.FULL }
 
 /**
- * V2 PART B — live device tilt (-1..1 per axis) from the real gravity
- * sensor, low-pass smoothed at the app root. (0,0) = flat/no sensor/
- * reduce-motion — every consumer then renders exactly the pre-B look.
- * Non-static local: updates flow only into readers (draw-phase lighting
- * and parallax planes), not the whole tree.
- */
-val LocalDeviceTilt = androidx.compose.runtime.compositionLocalOf { 0f to 0f }
-
-/**
  * Core 3D surface: gradient fake-lighting + top-left highlight border
  * + soft shadow. Pure GPU (gradient + shadow), no per-frame allocs.
  */

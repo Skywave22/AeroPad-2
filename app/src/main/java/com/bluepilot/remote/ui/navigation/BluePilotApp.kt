@@ -3,8 +3,6 @@ package com.bluepilot.remote.ui.navigation
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Box
@@ -98,24 +96,23 @@ fun BluePilotApp(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-    // Card-flip screen transitions; collapses to a fast fade under
-    // Reduce Motion.
+    // MOTION REDESIGN: Material 3 shared-axis X. The old "card flip"
+    // (scale+fade+slide all at once, 280ms) felt heavy and caused visible
+    // jank on mid-range phones because three transforms animated per frame.
+    // Shared-axis is one slide + one fade, 220ms, GPU-cheap and directional
+    // (forward pushes left, back pushes right) — the standard M3 pattern.
     val reduceMotion = com.bluepilot.remote.ui.components.LocalReduceMotion.current
-    val flipIn = scaleIn(tween(280), initialScale = 0.92f) + fadeIn(tween(280)) +
-        slideInHorizontally(tween(280)) { it / 5 }
-    val flipOut = scaleOut(tween(220), targetScale = 0.94f) + fadeOut(tween(200)) +
-        slideOutHorizontally(tween(280)) { -it / 5 }
-    val flipPopIn = scaleIn(tween(280), initialScale = 0.92f) + fadeIn(tween(280)) +
-        slideInHorizontally(tween(280)) { -it / 5 }
-    val flipPopOut = scaleOut(tween(220), targetScale = 0.94f) + fadeOut(tween(200)) +
-        slideOutHorizontally(tween(280)) { it / 5 }
+    val axisIn = slideInHorizontally(tween(220)) { it / 8 } + fadeIn(tween(180))
+    val axisOut = slideOutHorizontally(tween(220)) { -it / 8 } + fadeOut(tween(140))
+    val axisPopIn = slideInHorizontally(tween(220)) { -it / 8 } + fadeIn(tween(180))
+    val axisPopOut = slideOutHorizontally(tween(220)) { it / 8 } + fadeOut(tween(140))
     NavHost(
         navController = navController,
         startDestination = startRoute,
-        enterTransition = { if (reduceMotion) fadeIn(tween(120)) else flipIn },
-        exitTransition = { if (reduceMotion) fadeOut(tween(120)) else flipOut },
-        popEnterTransition = { if (reduceMotion) fadeIn(tween(120)) else flipPopIn },
-        popExitTransition = { if (reduceMotion) fadeOut(tween(120)) else flipPopOut }
+        enterTransition = { if (reduceMotion) fadeIn(tween(100)) else axisIn },
+        exitTransition = { if (reduceMotion) fadeOut(tween(100)) else axisOut },
+        popEnterTransition = { if (reduceMotion) fadeIn(tween(100)) else axisPopIn },
+        popExitTransition = { if (reduceMotion) fadeOut(tween(100)) else axisPopOut }
     ) {
         composable(Routes.HOME) {
             HomeScreen(

@@ -179,25 +179,25 @@ fun ThemedBackground(
         label = "themedBg"
     )
 
-    // SECTION 3D — parallax depth: orbs drift slowly on offset phases so
-    // background layers feel separated. Draw-phase only (reading the
-    // animated value inside Canvas), zero recomposition per frame.
-    val drift = rememberInfiniteTransition(label = "orbDrift")
-    val phase by drift.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            tween(durationMillis = 26_000, easing = LinearEasing),
-            RepeatMode.Restart
-        ),
-        label = "orbPhase"
-    )
-
-    // V2 PART B — gravity parallax: real tilt shifts each orb layer at a
-    // depth-dependent rate (deeper layers move more), so the backdrop
-    // separates into true planes when you tilt the phone. (0,0) tilt =
-    // exact pre-B rendering.
-    val (tiltX, tiltY) = com.bluepilot.remote.ui.components.LocalDeviceTilt.current
+    // MOTION FIX: the drift animation used to run its infinite clock even
+    // under Reduce Motion (phase was forced to 0 but the transition still
+    // invalidated every frame = silent battery drain). Now the infinite
+    // transition simply isn't created when motion is reduced or there are
+    // no orbs to animate.
+    val animateOrbs = !reduceMotion && spec.backgroundOrbs.isNotEmpty()
+    val phase: Float = if (animateOrbs) {
+        val drift = rememberInfiniteTransition(label = "orbDrift")
+        val p by drift.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                tween(durationMillis = 26_000, easing = LinearEasing),
+                RepeatMode.Restart
+            ),
+            label = "orbPhase"
+        )
+        p
+    } else 0f
 
     Box(modifier = modifier.fillMaxSize().background(bgColor)) {
         if (spec.backgroundOrbs.isNotEmpty()) {
@@ -206,16 +206,11 @@ fun ThemedBackground(
                 spec.backgroundOrbs.forEachIndexed { index, orb ->
                     // Each orb gets its own phase offset + drift radius, so
                     // layers move at different apparent depths (parallax).
-                    val p = if (reduceMotion) 0f
+                    val p = if (!animateOrbs) 0f
                     else ((phase + index * 0.33f) % 1f) * 2f * Math.PI.toFloat()
                     val driftAmp = maxEdge * 0.015f * (1 + index % 3)
-                    // Depth factor: layer 0 nearest (subtle), deeper layers
-                    // shift up to ~4% of the long edge at full tilt.
-                    val depth = 0.012f * (1 + index % 3)
-                    val px = -tiltX * maxEdge * depth
-                    val py = tiltY * maxEdge * depth
-                    val cx = size.width * orb.x + kotlin.math.sin(p) * driftAmp + px
-                    val cy = size.height * orb.y + kotlin.math.cos(p * 0.8f) * driftAmp + py
+                    val cx = size.width * orb.x + kotlin.math.sin(p) * driftAmp
+                    val cy = size.height * orb.y + kotlin.math.cos(p * 0.8f) * driftAmp
                     drawCircle(
                         brush = Brush.radialGradient(
                             colors = listOf(

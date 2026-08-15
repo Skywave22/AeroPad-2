@@ -40,13 +40,11 @@ private data class OnboardStep(val emoji: String, val title: String, val body: S
 
 private val steps = listOf(
     OnboardStep("📡", "Pair once, control everything",
-        "BluePilot makes your phone a real Bluetooth keyboard & mouse. Open Connect, make the phone discoverable, and pair from your PC — no PC software needed."),
-    OnboardStep("🖱️", "Mouse, keyboard & more",
-        "Trackpad with gestures, full PC keyboard, numpad, media remote, presenter and gamepad — all ready out of the box."),
-    OnboardStep("🎨", "Make it yours",
-        "Use the trackpad, keyboard, media remote, presenter and gamepad — everything runs over Bluetooth HID, no software needed on the PC."),
+        "AeroPad makes your phone a real Bluetooth keyboard & mouse. Tap Connect, make the phone discoverable, and pair from your PC — no PC software needed."),
+    OnboardStep("🖱️", "Five controls, zero setup",
+        "Trackpad with two-finger scroll and pinch-zoom, full PC keyboard, media remote, presenter with timer, and a real HID gamepad."),
     OnboardStep("⚡", "Pro tips",
-        "Long-press the trackpad for right-click. Two-finger swipe scrolls. Pin the app in Settings to keep the connection alive.")
+        "Long-press the trackpad for right-click. Your phone's volume keys drive the PC volume. Control PC media straight from the notification shade.")
 )
 
 @Composable

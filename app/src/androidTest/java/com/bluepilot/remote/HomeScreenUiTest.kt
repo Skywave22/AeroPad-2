@@ -33,11 +33,11 @@ class HomeScreenUiTest {
 
     @Test
     fun homeShowsAppTitleAndTiles() {
-        composeRule.onNodeWithText("BluePilot Remote").assertIsDisplayed()
-        composeRule.onNodeWithText("Connect").assertIsDisplayed()
+        composeRule.onNodeWithText("AeroPad").assertIsDisplayed()
+        composeRule.onNodeWithText("Connect to a PC").assertIsDisplayed()
         composeRule.onNodeWithText("Mouse").assertIsDisplayed()
         composeRule.onNodeWithText("Keyboard").assertIsDisplayed()
-        composeRule.onNodeWithText("Multimedia").assertIsDisplayed()
+        composeRule.onNodeWithText("Media").assertIsDisplayed()
     }
 
     @Test
