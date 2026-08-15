@@ -58,8 +58,7 @@ class ConnectionViewModel @Inject constructor(
     /** Toggle a bonded device as a saved quick-switch host. */
     fun toggleSavedHost(device: RemoteDevice) {
         val existing = hostStore.profiles.value.firstOrNull {
-            it.transport == com.bluepilot.remote.data.hosts.HostProfile.TRANSPORT_BT &&
-                it.address == device.address
+            it.address == device.address
         }
         if (existing != null) hostStore.remove(existing.id)
         else hostStore.saveBt(label = device.name, mac = device.address)
