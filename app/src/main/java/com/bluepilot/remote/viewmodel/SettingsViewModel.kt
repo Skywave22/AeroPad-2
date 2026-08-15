@@ -90,8 +90,6 @@ class SettingsViewModel @Inject constructor(
     fun setSecureScreen(value: Boolean) = updateApp { it.copy(secureScreen = value) }
     fun setOnboardingDone() = updateApp { it.copy(onboardingDone = true) }
     fun setReduceMotion(value: Boolean) = updateApp { it.copy(reduceMotion = value) }
-    fun setIconPack(value: String) = updateApp { it.copy(iconPack = value) }
-    fun setQuality3D(value: String) = updateApp { it.copy(quality3D = value) }
     fun setSpokenAlerts(value: Boolean) = updateApp { it.copy(spokenAlerts = value) }   // V2 M5 b2
     fun setAutoReconnectLast(value: Boolean) = updateApp { it.copy(autoReconnectLast = value) }   // V2 M4 b2
 

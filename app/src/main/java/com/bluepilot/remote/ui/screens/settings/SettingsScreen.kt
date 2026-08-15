@@ -102,7 +102,7 @@ fun SettingsScreen(
             )
 
             // ---------- General ----------
-            if (matches("theme", "fullscreen", "screen", "vibration", "secure", "gallery", "motion", "3d", "icon", "pack")) SettingsGroup("General") {
+            if (matches("theme", "fullscreen", "screen", "vibration", "secure", "motion", "reconnect")) SettingsGroup("General") {
                 Text(
                     text = if (spec.monoFont) "THEME" else "Theme",
                     style = if (spec.monoFont) MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace)
@@ -154,28 +154,6 @@ fun SettingsScreen(
                         }
                     }
                 }
-                Text("3D quality", style = MaterialTheme.typography.bodyMedium)
-                Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                    listOf("FULL", "REDUCED", "FLAT").forEach { q ->
-                        FilterChip(
-                            selected = app.quality3D == q,
-                            onClick = { viewModel.setQuality3D(q) },
-                            label = { Text(q.lowercase().replaceFirstChar { it.uppercase() }) },
-                            modifier = Modifier.padding(end = 6.dp)
-                        )
-                    }
-                }
-                Text("Icon pack", style = MaterialTheme.typography.bodyMedium)
-                Row(modifier = Modifier.padding(vertical = 4.dp)) {
-                    listOf("FILLED", "OUTLINED", "ROUNDED", "SHARP").forEach { pack ->
-                        FilterChip(
-                            selected = app.iconPack == pack,
-                            onClick = { viewModel.setIconPack(pack) },
-                            label = { Text(pack.lowercase().replaceFirstChar { it.uppercase() }) },
-                            modifier = Modifier.padding(end = 6.dp)
-                        )
-                    }
-                }
                 ToggleRow(
                     "Reconnect on launch",
                     app.autoReconnectLast,
@@ -206,8 +184,7 @@ fun SettingsScreen(
                 )
                 Text(
                     "More: Reduce motion lives under General • gamepad controls " +
-                        "announce their bindings to TalkBack • the layout editor flags " +
-                        "controls under the 48dp touch target.",
+                        "announce their bindings to TalkBack.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
