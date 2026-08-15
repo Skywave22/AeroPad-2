@@ -25,6 +25,8 @@ data class AppSettings(
     val secureScreen: Boolean = false,
     /** First-run onboarding shown & dismissed (UI/UX redesign). */
     val onboardingDone: Boolean = false,
+    /** FEATURE: phone volume buttons control the PC volume while connected. */
+    val volumeKeysToPc: Boolean = true,
     /** FEATURE: quick text snippets — user-saved phrases typed with one
      *  tap from the Keyboard screen. Stored as unit-separator joined
      *  string (U+001F never appears in normal text). Max 20. */

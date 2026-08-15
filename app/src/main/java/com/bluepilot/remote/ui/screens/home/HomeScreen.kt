@@ -160,6 +160,52 @@ fun HomeScreen(
             }
             Spacer(Modifier.height(14.dp))
 
+            // FEATURE: quick actions while connected — instant PC controls.
+            run {
+                if (state.isConnected) {
+                    val remote: com.bluepilot.remote.viewmodel.RemoteControlViewModel =
+                        hiltViewModel()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        androidx.compose.material3.AssistChip(
+                            onClick = {
+                                remote.keyTap(
+                                    com.bluepilot.remote.model.HidKeys.L,
+                                    com.bluepilot.remote.model.HidModifiers.LEFT_GUI
+                                )
+                            },
+                            label = { Text("🔒 Lock PC") }
+                        )
+                        androidx.compose.material3.AssistChip(
+                            onClick = {
+                                remote.keyTap(
+                                    com.bluepilot.remote.model.HidKeys.D,
+                                    com.bluepilot.remote.model.HidModifiers.LEFT_GUI
+                                )
+                            },
+                            label = { Text("🖥 Desktop") }
+                        )
+                        androidx.compose.material3.AssistChip(
+                            onClick = {
+                                remote.mediaTap(com.bluepilot.remote.model.HidConsumer.PLAY_PAUSE)
+                            },
+                            label = { Text("⏯ Media") }
+                        )
+                        androidx.compose.material3.AssistChip(
+                            onClick = {
+                                remote.mediaTap(com.bluepilot.remote.model.HidConsumer.MUTE)
+                            },
+                            label = { Text("🔇 Mute") }
+                        )
+                    }
+                    Spacer(Modifier.height(10.dp))
+                }
+            }
+
             // FEATURE: saved-PC quick-connect strip — your machines, one tap.
             run {
                 val saved by viewModel.savedHosts.collectAsState()

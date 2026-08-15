@@ -41,6 +41,11 @@ class HidService : Service() {
         private const val CHANNEL_ID = "bluepilot_hid"
         private const val NOTIFICATION_ID = 42
 
+        // FEATURE: media controls straight from the notification shade.
+        const val ACTION_MEDIA_PLAY = "com.bluepilot.remote.NOTIF_PLAY"
+        const val ACTION_MEDIA_NEXT = "com.bluepilot.remote.NOTIF_NEXT"
+        const val ACTION_MEDIA_PREV = "com.bluepilot.remote.NOTIF_PREV"
+
         /** Starts the service (safe if already running). */
         fun start(context: Context) {
             runCatching {
@@ -91,6 +96,24 @@ class HidService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // FEATURE: notification media buttons -> HID consumer taps.
+        when (intent?.action) {
+            ACTION_MEDIA_PLAY -> hidController.send(
+                com.bluepilot.remote.model.HidAction.MediaTap(
+                    com.bluepilot.remote.model.HidConsumer.PLAY_PAUSE
+                )
+            )
+            ACTION_MEDIA_NEXT -> hidController.send(
+                com.bluepilot.remote.model.HidAction.MediaTap(
+                    com.bluepilot.remote.model.HidConsumer.NEXT_TRACK
+                )
+            )
+            ACTION_MEDIA_PREV -> hidController.send(
+                com.bluepilot.remote.model.HidAction.MediaTap(
+                    com.bluepilot.remote.model.HidConsumer.PREV_TRACK
+                )
+            )
+        }
         hidController.start()
         return START_STICKY // restart if the system kills us; engine re-registers safely
     }
@@ -133,14 +156,27 @@ class HidService : Service() {
             Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        fun serviceAction(action: String, requestCode: Int): PendingIntent =
+            PendingIntent.getService(
+                this, requestCode,
+                Intent(this, HidService::class.java).setAction(action),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(text)
             .setContentIntent(contentIntent)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .build()
+        // FEATURE: PC media controls from the shade while connected.
+        if (hidController.state.value is HidConnectionState.Connected) {
+            builder
+                .addAction(0, "⏮", serviceAction(ACTION_MEDIA_PREV, 1))
+                .addAction(0, "⏯", serviceAction(ACTION_MEDIA_PLAY, 2))
+                .addAction(0, "⏭", serviceAction(ACTION_MEDIA_NEXT, 3))
+        }
+        return builder.build()
     }
 
     private fun updateNotification(text: String) {

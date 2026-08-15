@@ -85,7 +85,7 @@ fun MouseScreen(
                 .padding(horizontal = 16.dp)
         ) {
             NotConnectedBanner(!isConnected)
-            HintBar("Long-press the trackpad for right-click • two-finger drag scrolls")
+            HintBar("Long-press = right-click • two fingers scroll • pinch zooms")
 
             // AEROPAD v1.0 — #19 Precision Mode + #22 Drag Lock chips.
             run {
@@ -132,14 +132,26 @@ fun MouseScreen(
                                     val pressed = event.changes.filter { it.pressed }
                                     if (pressed.isEmpty()) break
                                     if (pressed.size >= 2) {
-                                        // two-finger scroll: average Y delta
+                                        // FEATURE: pinch-to-zoom vs two-finger scroll.
+                                        // Compare finger-distance change (pinch)
+                                        // against common Y motion (scroll).
+                                        val a = pressed[0]; val b = pressed[1]
+                                        val distNow = (a.position - b.position).getDistance()
+                                        val distPrev = (a.previousPosition - b.previousPosition).getDistance()
+                                        val pinchDelta = distNow - distPrev
                                         val dy = pressed
                                             .map { it.position.y - it.previousPosition.y }
                                             .average().toFloat()
-                                        scrollAccum += dy
-                                        if (kotlin.math.abs(scrollAccum) > 8f) {
-                                            viewModel.onScrollDelta(scrollAccum)
-                                            scrollAccum = 0f
+                                        if (kotlin.math.abs(pinchDelta) > kotlin.math.abs(dy) * 1.5f &&
+                                            distPrev > 0f
+                                        ) {
+                                            viewModel.onPinchZoom(distNow / distPrev)
+                                        } else {
+                                            scrollAccum += dy
+                                            if (kotlin.math.abs(scrollAccum) > 8f) {
+                                                viewModel.onScrollDelta(scrollAccum)
+                                                scrollAccum = 0f
+                                            }
                                         }
                                     } else {
                                         val c = pressed.first()

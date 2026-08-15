@@ -54,6 +54,7 @@ class SettingsViewModel @Inject constructor(
 
     // ----- App -----
     fun setTheme(theme: ThemeMode) = updateApp { it.copy(theme = theme) }
+    fun setVolumeKeysToPc(v: Boolean) = updateApp { it.copy(volumeKeysToPc = v) }
 
     // ---- FEATURE: quick text snippets ----
     companion object { private const val SNIPPET_SEP = '\u001F'; private const val SNIPPETS_MAX = 20 }

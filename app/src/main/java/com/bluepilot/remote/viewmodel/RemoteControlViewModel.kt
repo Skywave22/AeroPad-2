@@ -111,6 +111,26 @@ class RemoteControlViewModel @Inject constructor(
     fun buttonUp() = sendAction(HidAction.MouseUp(MouseButton.LEFT))
 
     /** Scroll strip drag: accumulate px, emit whole wheel steps. */
+    // FEATURE: pinch-to-zoom on the trackpad -> Ctrl+scroll (universal
+    // zoom gesture on Windows/macOS/Linux browsers & apps).
+    private var zoomAccum = 0f
+    fun onPinchZoom(zoomChange: Float) {
+        zoomAccum += zoomChange - 1f
+        val threshold = 0.04f
+        while (zoomAccum > threshold) {
+            zoomAccum -= threshold
+            sendAction(HidAction.KeyDown(HidKeys.NONE, com.bluepilot.remote.model.HidModifiers.LEFT_CTRL))
+            sendAction(HidAction.MouseScroll(1))
+            sendAction(HidAction.KeyRelease)
+        }
+        while (zoomAccum < -threshold) {
+            zoomAccum += threshold
+            sendAction(HidAction.KeyDown(HidKeys.NONE, com.bluepilot.remote.model.HidModifiers.LEFT_CTRL))
+            sendAction(HidAction.MouseScroll(-1))
+            sendAction(HidAction.KeyRelease)
+        }
+    }
+
     fun onScrollDelta(dyPx: Float) {
         trackpad.scroll(dyPx).takeIf { it != 0 }?.let { sendAction(HidAction.MouseScroll(it)) }
     }
@@ -119,7 +139,20 @@ class RemoteControlViewModel @Inject constructor(
     // Keyboard / text
     // ------------------------------------------------------------------
 
-    fun keyTap(key: Byte, modifiers: Byte = 0) = sendAction(HidAction.KeyTap(key, modifiers))
+    // FEATURE: modifier lock — arm Ctrl/Alt/Shift/Win as sticky toggles;
+    // the next key tap combines them (then they clear, like sticky keys).
+    private val _lockedModifiers = kotlinx.coroutines.flow.MutableStateFlow<Byte>(0)
+    val lockedModifiers: kotlinx.coroutines.flow.StateFlow<Byte> = _lockedModifiers
+    fun toggleModifier(mod: Byte) {
+        _lockedModifiers.value = (_lockedModifiers.value.toInt() xor mod.toInt()).toByte()
+    }
+
+    fun keyTap(key: Byte, modifiers: Byte = 0) {
+        val locked = _lockedModifiers.value
+        val combined = (modifiers.toInt() or locked.toInt()).toByte()
+        sendAction(HidAction.KeyTap(key, combined))
+        if (locked != 0.toByte()) _lockedModifiers.value = 0
+    }
     fun typeText(text: String) {
         if (text.isNotEmpty()) {
             sendAction(HidAction.TypeText(text))

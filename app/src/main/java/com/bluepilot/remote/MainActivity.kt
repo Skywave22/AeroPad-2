@@ -41,6 +41,51 @@ class MainActivity : ComponentActivity() {
     @javax.inject.Inject
     lateinit var autoReconnector: com.bluepilot.remote.domain.AutoReconnector
 
+    @javax.inject.Inject
+    lateinit var hidController: com.bluepilot.remote.domain.HidController
+
+    @javax.inject.Inject
+    lateinit var settingsStore: com.bluepilot.remote.domain.SettingsStore
+
+    /** FEATURE: phone volume buttons drive the PC volume while connected.
+     *  Falls through to normal phone volume when disconnected or disabled. */
+    private var volumeKeysToPc = true
+    override fun onKeyDown(keyCode: Int, event: android.view.KeyEvent?): Boolean {
+        if (volumeKeysToPc &&
+            hidController.state.value is com.bluepilot.remote.model.HidConnectionState.Connected
+        ) {
+            when (keyCode) {
+                android.view.KeyEvent.KEYCODE_VOLUME_UP -> {
+                    hidController.send(
+                        com.bluepilot.remote.model.HidAction.MediaTap(
+                            com.bluepilot.remote.model.HidConsumer.VOLUME_UP
+                        )
+                    )
+                    return true
+                }
+                android.view.KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                    hidController.send(
+                        com.bluepilot.remote.model.HidAction.MediaTap(
+                            com.bluepilot.remote.model.HidConsumer.VOLUME_DOWN
+                        )
+                    )
+                    return true
+                }
+            }
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: android.view.KeyEvent?): Boolean {
+        // Swallow the matching UP events too, or the system volume UI pops.
+        if (volumeKeysToPc &&
+            hidController.state.value is com.bluepilot.remote.model.HidConnectionState.Connected &&
+            (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP ||
+                keyCode == android.view.KeyEvent.KEYCODE_VOLUME_DOWN)
+        ) return true
+        return super.onKeyUp(keyCode, event)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -48,6 +93,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
             val app by settingsViewModel.app.collectAsState()
+            // FEATURE: volume-keys-to-PC — keep the activity flag in sync.
+            androidx.compose.runtime.LaunchedEffect(app.volumeKeysToPc) {
+                volumeKeysToPc = app.volumeKeysToPc
+            }
 
             // Single default theme family; Light/Dark/System picks the
             // matching brightness variant.

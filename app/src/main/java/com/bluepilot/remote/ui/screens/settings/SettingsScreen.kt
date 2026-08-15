@@ -155,6 +155,12 @@ fun SettingsScreen(
                     }
                 }
                 ToggleRow(
+                    "Volume buttons control PC",
+                    app.volumeKeysToPc,
+                    viewModel::setVolumeKeysToPc,
+                    subtitle = "While connected, the phone's volume keys change the PC volume"
+                )
+                ToggleRow(
                     "Reconnect on launch",
                     app.autoReconnectLast,
                     viewModel::setAutoReconnectLast,

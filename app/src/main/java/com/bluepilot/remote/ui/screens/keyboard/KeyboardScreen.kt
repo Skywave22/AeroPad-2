@@ -245,6 +245,34 @@ fun KeyboardScreen(
             }
             Spacer(Modifier.height(4.dp))
 
+            // ---------- FEATURE: Modifier lock (sticky keys) ----------
+            SectionLabel("Modifier lock")
+            run {
+                val locked by viewModel.lockedModifiers.collectAsState()
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf(
+                        "Ctrl" to HidModifiers.LEFT_CTRL,
+                        "Shift" to HidModifiers.LEFT_SHIFT,
+                        "Alt" to HidModifiers.LEFT_ALT,
+                        "Win" to HidModifiers.LEFT_GUI
+                    ).forEach { (label, mod) ->
+                        androidx.compose.material3.FilterChip(
+                            selected = (locked.toInt() and mod.toInt()) != 0,
+                            onClick = { haptic(); viewModel.toggleModifier(mod) },
+                            label = { Text(label) }
+                        )
+                    }
+                }
+                if (locked != 0.toByte()) {
+                    Text(
+                        "Armed — the next key you tap fires with these modifiers, then they clear.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+
             // ---------- Shortcuts ----------
             SectionLabel("Shortcuts")
             val ctrl = HidModifiers.LEFT_CTRL

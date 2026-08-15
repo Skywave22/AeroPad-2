@@ -12,6 +12,11 @@ Built 100% in Kotlin + Jetpack Compose, MVVM + Clean Architecture, Hilt, DataSto
 - **Presenter** — big prev/next, start/from-here, black/white screen, end, and a **built-in presentation timer**.
 - **Gamepad** — virtual stick + D-pad + ABXY + shoulders; three modes: real HID gamepad, keyboard fallback, mouse+keyboard hybrid; sensitivity + dead-zone tuning.
 - **Home quick-connect** — saved PCs appear as one-tap connect chips the moment you open the app.
+- **Quick actions** — Lock PC, Show desktop, Play/Pause and Mute chips on Home while connected.
+- **Pinch-to-zoom** — pinch the trackpad to zoom on the PC (Ctrl+scroll).
+- **Modifier lock** — arm Ctrl/Shift/Alt/Win as sticky toggles, tap any key to fire the combo.
+- **Phone volume buttons control the PC** while connected (toggleable).
+- **Notification media controls** — prev/play/next buttons for the PC right in the notification shade.
 
 ### Connection
 - Real Bluetooth HID Device — works with Windows, macOS, Linux, Android/Google TV, most smart TVs.

@@ -45,6 +45,7 @@ class DataStoreSettings @Inject constructor(
 
     private object Keys {
         val QUICK_SNIPPETS = stringPreferencesKey("app_quick_snippets")
+        val VOLUME_KEYS_TO_PC = booleanPreferencesKey("app_volume_keys_to_pc")
         // App
         val THEME = stringPreferencesKey("theme")
         val THEME_ID = stringPreferencesKey("theme_id")
@@ -106,6 +107,7 @@ class DataStoreSettings @Inject constructor(
             secureScreen = p[Keys.SECURE_SCREEN] ?: false,
             onboardingDone = p[Keys.ONBOARDING_DONE] ?: false,
             quickSnippets = p[Keys.QUICK_SNIPPETS] ?: "",
+            volumeKeysToPc = p[Keys.VOLUME_KEYS_TO_PC] ?: true,
             reduceMotion = p[Keys.REDUCE_MOTION] ?: false,
             iconPack = p[Keys.ICON_PACK] ?: "ROUNDED",
             quality3D = p[Keys.QUALITY_3D] ?: "FULL",
@@ -157,6 +159,7 @@ class DataStoreSettings @Inject constructor(
             p[Keys.SECURE_SCREEN] = settings.secureScreen
             p[Keys.ONBOARDING_DONE] = settings.onboardingDone
             p[Keys.QUICK_SNIPPETS] = settings.quickSnippets
+            p[Keys.VOLUME_KEYS_TO_PC] = settings.volumeKeysToPc
             p[Keys.REDUCE_MOTION] = settings.reduceMotion
             p[Keys.ICON_PACK] = settings.iconPack
             p[Keys.QUALITY_3D] = settings.quality3D
