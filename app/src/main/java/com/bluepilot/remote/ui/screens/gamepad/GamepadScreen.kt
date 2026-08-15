@@ -65,8 +65,6 @@ import kotlin.math.roundToInt
 @Composable
 fun GamepadScreen(
     onBack: () -> Unit,
-    // UI/UX v2.1 — Pad Builder is now an OPTION of the Gamepad hub. = {},
-    /** GTA presets — opens the builder player on a seeded preset key. */ = {},
     viewModel: RemoteControlViewModel = hiltViewModel()
 ) {
     val isConnected by viewModel.isConnected.collectAsState()
