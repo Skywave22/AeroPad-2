@@ -40,7 +40,6 @@ class KeyboardLayoutStore @Inject constructor(
         val LAYOUT_JSON = stringPreferencesKey("layout_json")
         val FULL_MODE = booleanPreferencesKey("full_mode")
         val COMBO_RATIO = androidx.datastore.preferences.core.floatPreferencesKey("combo_ratio")
-        val COMBO_SCROLL_SIDE = stringPreferencesKey("combo_scroll_side")
         val ONE_HANDED = stringPreferencesKey("one_handed")   // V2 M7 b2
     }
 
@@ -112,13 +111,6 @@ class KeyboardLayoutStore @Inject constructor(
         (p[Keys.COMBO_RATIO] ?: 0.5f).coerceIn(0.25f, 0.75f)
     }
 
-    val comboScrollSide: Flow<com.bluepilot.remote.viewmodel.ScrollBarSide> = safePrefs.map { p ->
-        runCatching {
-            com.bluepilot.remote.viewmodel.ScrollBarSide.valueOf(
-                p[Keys.COMBO_SCROLL_SIDE] ?: "RIGHT"
-            )
-        }.getOrDefault(com.bluepilot.remote.viewmodel.ScrollBarSide.RIGHT)
-    }
 
     suspend fun setComboRatio(value: Float) {
         runCatching {
@@ -126,9 +118,4 @@ class KeyboardLayoutStore @Inject constructor(
         }.onFailure { Timber.e(it, "combo ratio save failed") }
     }
 
-    suspend fun setComboScrollSide(side: com.bluepilot.remote.viewmodel.ScrollBarSide) {
-        runCatching {
-            context.keyboardDataStore.edit { p -> p[Keys.COMBO_SCROLL_SIDE] = side.name }
-        }.onFailure { Timber.e(it, "combo side save failed") }
-    }
 }

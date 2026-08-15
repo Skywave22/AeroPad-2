@@ -86,14 +86,6 @@ fun GamepadScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back")
                     }
-                },
-                actions = {
-                    // UI/UX v2.1 — custom pads live here now, not on Home.
-                    androidx.compose.material3.AssistChip(
-                        onClick = onOpenBuilder,
-                        label = { Text("Pad Builder") }
-                    )
-                    Spacer(Modifier.width(6.dp))
                 }
             )
         }

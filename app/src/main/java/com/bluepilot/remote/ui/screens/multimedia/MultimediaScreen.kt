@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Brush
@@ -314,7 +315,7 @@ private fun TransportKey(
     val tint = if (error) spec.error else MaterialTheme.colorScheme.onSurfaceVariant
     val interaction = if (onHoldStart != null) {
         Modifier.pointerInput(Unit) {
-            androidx.compose.foundation.gestures.detectTapGestures(
+            detectTapGestures(
                 onPress = {
                     onHoldStart()
                     tryAwaitRelease()

@@ -52,10 +52,7 @@ class ConnectionViewModel @Inject constructor(
 
     val savedHostAddresses: StateFlow<Set<String>> =
         hostStore.profiles
-            .map { list ->
-                list.filter { it.transport == com.bluepilot.remote.data.hosts.HostProfile.TRANSPORT_BT }
-                    .map { it.address }.toSet()
-            }
+            .map { list -> list.map { it.address }.toSet() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptySet())
 
     /** Toggle a bonded device as a saved quick-switch host. */

@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.input.pointer.pointerInput
@@ -112,7 +113,7 @@ fun KeyboardScreen(
                         Box(
                             modifier = Modifier
                                 .pointerInput(text) {
-                                    androidx.compose.foundation.gestures.detectTapGestures(
+                                    detectTapGestures(
                                         onTap = {
                                             haptic()
                                             viewModel.typeText(text)
@@ -414,7 +415,7 @@ private fun RepeatKeyCard(
         modifier = modifier
             .heightIn(min = 48.dp)
             .pointerInput(Unit) {
-                androidx.compose.foundation.gestures.detectTapGestures(
+                detectTapGestures(
                     onPress = {
                         haptic()
                         viewModel.keyRepeatStart(key, modifiers)

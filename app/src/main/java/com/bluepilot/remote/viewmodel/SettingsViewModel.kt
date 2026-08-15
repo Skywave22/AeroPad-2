@@ -78,15 +78,9 @@ class SettingsViewModel @Inject constructor(
         it.copy(
             themeId = id,
             theme = if (spec.isDark) com.bluepilot.remote.model.ThemeMode.DARK
-            else com.bluepilot.remote.model.ThemeMode.LIGHT,
-            recentThemes = com.bluepilot.remote.ui.theme.ThemeListCodec.push(it.recentThemes, id)
+            else com.bluepilot.remote.model.ThemeMode.LIGHT
         )
     }.also { haptics.play(com.bluepilot.remote.model.gamepad.HapticPattern.MEDIUM_CLICK) }
-
-    /** SECTION 1: pin/unpin a theme in the favorites row. */
-    fun toggleFavoriteTheme(id: String) = updateApp {
-        it.copy(favoriteThemes = com.bluepilot.remote.ui.theme.ThemeListCodec.toggle(it.favoriteThemes, id))
-    }
 
     // SECTION 1: auto theme scheduling.
     fun setFullscreen(value: Boolean) = updateApp { it.copy(fullscreenMode = value) }
