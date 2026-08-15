@@ -71,6 +71,7 @@ class DataStoreSettings @Inject constructor(
         val M_SCROLL = intPreferencesKey("m_scroll")
         val M_SMOOTHING = intPreferencesKey("m_smoothing")
         val M_INVERT = booleanPreferencesKey("m_invert")
+        val M_SWAP = booleanPreferencesKey("m_swap")
         val M_TAP_CLICK = booleanPreferencesKey("m_tap_click")
         val M_PEN = booleanPreferencesKey("m_pen")
         // Keyboard
@@ -128,6 +129,7 @@ class DataStoreSettings @Inject constructor(
             scrollSpeed = p[Keys.M_SCROLL] ?: 50,
             movementSmoothing = p[Keys.M_SMOOTHING] ?: 20,
             invertScroll = p[Keys.M_INVERT] ?: false,
+            swapButtons = p[Keys.M_SWAP] ?: false,
             tapToClick = p[Keys.M_TAP_CLICK] ?: true,
             penMode = p[Keys.M_PEN] ?: false
         ).sanitized()
@@ -182,6 +184,7 @@ class DataStoreSettings @Inject constructor(
             p[Keys.M_SCROLL] = s.scrollSpeed
             p[Keys.M_SMOOTHING] = s.movementSmoothing
             p[Keys.M_INVERT] = s.invertScroll
+            p[Keys.M_SWAP] = s.swapButtons
             p[Keys.M_TAP_CLICK] = s.tapToClick
             p[Keys.M_PEN] = s.penMode
         }

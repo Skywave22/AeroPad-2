@@ -75,6 +75,8 @@ data class MouseSettings(
     val scrollSpeed: Int = 50,
     val movementSmoothing: Int = 20,
     val invertScroll: Boolean = false,
+    /** BLEK-PRO v2: left-handed mode — swaps left/right mouse buttons. */
+    val swapButtons: Boolean = false,
     val tapToClick: Boolean = true,
     val penMode: Boolean = false
 ) {

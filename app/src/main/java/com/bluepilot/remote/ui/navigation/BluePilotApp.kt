@@ -56,6 +56,7 @@ object Routes {
     // BLEK-PRO PACK
     const val AIR_MOUSE = "air_mouse"
     const val SCANNER = "scanner"
+    const val CUSTOM_REMOTE = "custom_remote"
 }
 
 @Composable
@@ -174,6 +175,9 @@ fun BluePilotApp(
         }
         composable(Routes.SCANNER) {
             com.bluepilot.remote.ui.screens.scanner.ScannerScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.CUSTOM_REMOTE) {
+            com.bluepilot.remote.ui.screens.custom.CustomRemoteScreen(onBack = { navController.popBackStack() })
         }
     }
 

@@ -30,6 +30,7 @@ import androidx.compose.material.icons.rounded.Mouse
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Air
 import androidx.compose.material.icons.rounded.QrCodeScanner
+import androidx.compose.material.icons.rounded.DashboardCustomize
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Slideshow
 import androidx.compose.material3.Button
@@ -88,7 +89,8 @@ private val controlTiles = listOf(
     Tile("Presenter", "Slides & timer", Icons.Rounded.Slideshow, Routes.PRESENTER, 0xFFF5C542),
     // BLEK-PRO PACK
     Tile("Air Mouse", "Wave to point", Icons.Rounded.Air, Routes.AIR_MOUSE, 0xFF35D07F),
-    Tile("Scanner", "QR & barcodes to PC", Icons.Rounded.QrCodeScanner, Routes.SCANNER, 0xFFFF8A3D)
+    Tile("Scanner", "QR & barcodes to PC", Icons.Rounded.QrCodeScanner, Routes.SCANNER, 0xFFFF8A3D),
+    Tile("Custom", "Your buttons & macros", Icons.Rounded.DashboardCustomize, Routes.CUSTOM_REMOTE, 0xFFB06AFF)
 )
 
 @Composable

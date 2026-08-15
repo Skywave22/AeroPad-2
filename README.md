@@ -22,6 +22,8 @@ Built 100% in Kotlin + Jetpack Compose, MVVM + Clean Architecture, Hilt, DataSto
 - **Voice input** — dictate with the system speech recognizer, review, then send to the PC.
 - **Clipboard sync** — one tap types the phone's clipboard on the PC.
 - **Keep PC awake (jiggler)** — invisible 1-px pointer nudge every 50 s so the PC never sleeps, locks, or marks you away.
+- **Custom Remote** — build your own remote: create buttons from a 40+ action catalog, stack steps into one-tap **macros** (e.g. type login → Tab → password → Enter).
+- **Left-handed mode** — swap left/right mouse buttons everywhere (Settings → Mouse).
 
 ### Connection
 - Real Bluetooth HID Device — works with Windows, macOS, Linux, Android/Google TV, most smart TVs.

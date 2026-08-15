@@ -99,6 +99,8 @@ class SettingsViewModel @Inject constructor(
     // ----- Mouse -----
     fun setMouseSensitivity(value: Int) = updateMouse { it.copy(sensitivity = value) }
     fun setScrollSpeed(value: Int) = updateMouse { it.copy(scrollSpeed = value) }
+    /** BLEK-PRO v2: left-handed mode. */
+    fun setSwapButtons(value: Boolean) = updateMouse { it.copy(swapButtons = value) }
     fun setMovementSmoothing(value: Int) = updateMouse { it.copy(movementSmoothing = value) }
     fun setInvertScroll(value: Boolean) = updateMouse { it.copy(invertScroll = value) }
     fun setTapToClick(value: Boolean) = updateMouse { it.copy(tapToClick = value) }

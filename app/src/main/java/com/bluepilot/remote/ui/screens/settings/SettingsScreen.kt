@@ -210,6 +210,7 @@ fun SettingsScreen(
                 ToggleRow("Invert scroll", mouse.invertScroll, viewModel::setInvertScroll)
                 ToggleRow("Tap to click", mouse.tapToClick, viewModel::setTapToClick)
                 ToggleRow("Pen mode", mouse.penMode, viewModel::setPenMode, subtitle = "Slower, precise pointer")
+                ToggleRow("Left-handed mode", mouse.swapButtons, viewModel::setSwapButtons, subtitle = "Swaps left and right mouse buttons everywhere")
             }
 
             // ---------- Keyboard ----------

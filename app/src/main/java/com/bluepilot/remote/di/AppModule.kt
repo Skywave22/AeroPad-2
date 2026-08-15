@@ -35,6 +35,13 @@ abstract class AppModule {
         impl: com.bluepilot.remote.data.hosts.HostProfileStore
     ): com.bluepilot.remote.data.hosts.HostProfiles
 
+    // BLEK-PRO PACK v2 — custom remote layouts seam.
+    @Binds
+    @Singleton
+    abstract fun bindCustomRemote(
+        impl: com.bluepilot.remote.data.custom.CustomRemoteStore
+    ): com.bluepilot.remote.data.custom.CustomRemote
+
     // WIFI FIX #2 — merged BT+WiFi connection truth for every screen.
     @Binds
     @Singleton

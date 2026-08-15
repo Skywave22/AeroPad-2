@@ -106,7 +106,7 @@ class RemoteControlViewModel @Inject constructor(
 
     /** Tap on trackpad → left click (honors tap-to-click setting). */
     fun onTrackpadTap() {
-        if (mouseSettings.value.tapToClick) sendAction(HidAction.MouseClick(MouseButton.LEFT))
+        if (mouseSettings.value.tapToClick) sendAction(HidAction.MouseClick(MouseButton.LEFT.mapped()))
     }
 
     fun onTrackpadDoubleTap() {
@@ -114,10 +114,20 @@ class RemoteControlViewModel @Inject constructor(
     }
 
     /** Long-press on trackpad → right click. */
-    fun onTrackpadLongPress() = sendAction(HidAction.MouseClick(MouseButton.RIGHT))
+    fun onTrackpadLongPress() = sendAction(HidAction.MouseClick(MouseButton.RIGHT.mapped()))
 
-    fun clickButton(button: MouseButton) = sendAction(HidAction.MouseClick(button))
-    fun buttonDown(button: MouseButton) = sendAction(HidAction.MouseDown(button))
+    /** BLEK-PRO v2 — left-handed mode: swap L/R at the single choke point
+     *  every click flows through (trackpad taps + button bar + air mouse). */
+    private fun MouseButton.mapped(): MouseButton =
+        if (!mouseSettings.value.swapButtons) this
+        else when (this) {
+            MouseButton.LEFT -> MouseButton.RIGHT
+            MouseButton.RIGHT -> MouseButton.LEFT
+            else -> this
+        }
+
+    fun clickButton(button: MouseButton) = sendAction(HidAction.MouseClick(button.mapped()))
+    fun buttonDown(button: MouseButton) = sendAction(HidAction.MouseDown(button.mapped()))
     fun buttonUp() = sendAction(HidAction.MouseUp(MouseButton.LEFT))
 
     /** Scroll strip drag: accumulate px, emit whole wheel steps. */
