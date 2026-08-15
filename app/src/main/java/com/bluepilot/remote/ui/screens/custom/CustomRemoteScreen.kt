@@ -16,6 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.IosShare
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -70,6 +72,8 @@ fun CustomRemoteScreen(
     val buttons by viewModel.buttons.collectAsState()
 
     var showBuilder by remember { mutableStateOf(false) }
+    var showImport by remember { mutableStateOf(false) }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -82,6 +86,25 @@ fun CustomRemoteScreen(
                     }
                 },
                 actions = {
+                    // BLEK-PRO v3 — share layout (system share sheet).
+                    if (buttons.isNotEmpty()) {
+                        IconButton(onClick = {
+                            val send = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(android.content.Intent.EXTRA_TEXT, viewModel.exportCode())
+                            }
+                            runCatching {
+                                context.startActivity(
+                                    android.content.Intent.createChooser(send, "Share layout")
+                                )
+                            }
+                        }) {
+                            Icon(Icons.Rounded.IosShare, contentDescription = "Share layout")
+                        }
+                    }
+                    IconButton(onClick = { showImport = true }) {
+                        Icon(Icons.Rounded.Download, contentDescription = "Import layout")
+                    }
                     IconButton(onClick = { showBuilder = true }) {
                         Icon(Icons.Rounded.Add, contentDescription = "Add button")
                     }
@@ -176,6 +199,13 @@ fun CustomRemoteScreen(
             }
             Spacer(Modifier.height(100.dp))
         }
+    }
+
+    if (showImport) {
+        ImportDialog(
+            onDismiss = { showImport = false },
+            onImport = { code -> viewModel.importCode(code) }
+        )
     }
 
     if (showBuilder) {
@@ -312,4 +342,62 @@ private fun ButtonBuilderSheet(
             Spacer(Modifier.height(28.dp))
         }
     }
+}
+
+
+/** BLEK-PRO v3 — paste-a-code import dialog with inline result feedback. */
+@Composable
+private fun ImportDialog(
+    onDismiss: () -> Unit,
+    onImport: (String) -> Int
+) {
+    var code by remember { mutableStateOf("") }
+    var result by remember { mutableStateOf<Int?>(null) }
+
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Import layout") },
+        text = {
+            Column {
+                Text(
+                    "Paste a layout code someone shared (starts with AEROPAD1:). " +
+                        "Imported buttons are added to your existing ones.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.height(10.dp))
+                OutlinedTextField(
+                    value = code,
+                    onValueChange = { code = it; result = null },
+                    label = { Text("Layout code") },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 4
+                )
+                result?.let { n ->
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        if (n > 0) "✓ Imported $n button" + (if (n == 1) "" else "s")
+                        else "✕ Not a valid layout code",
+                        color = if (n > 0) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val n = onImport(code)
+                    result = n
+                },
+                enabled = code.isNotBlank()
+            ) { Text("Import") }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss) {
+                Text(if (result != null && result!! > 0) "Done" else "Cancel")
+            }
+        }
+    )
 }

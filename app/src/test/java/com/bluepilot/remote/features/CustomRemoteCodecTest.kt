@@ -69,6 +69,26 @@ class CustomRemoteCodecTest {
     }
 
     @Test
+    fun `share code roundtrip with fresh ids`() {
+        val list = listOf(btn("orig", "Login", listOf("t:user", "a:enter")))
+        val code = CustomRemoteCodec.exportShare(list)
+        assertTrue(code.startsWith("AEROPAD1:"))
+        val imported = CustomRemoteCodec.importShare(code)!!
+        assertEquals(1, imported.size)
+        assertEquals("Login", imported[0].label)
+        assertEquals(list[0].steps, imported[0].steps)
+        // fresh id => merging, never overwriting
+        assertTrue(imported[0].id != "orig")
+    }
+
+    @Test
+    fun `import of garbage returns null`() {
+        assertEquals(null, CustomRemoteCodec.importShare("hello"))
+        assertEquals(null, CustomRemoteCodec.importShare("AEROPAD1:%%%not-base64%%%"))
+        assertEquals(null, CustomRemoteCodec.importShare(""))
+    }
+
+    @Test
     fun `catalog ids are unique and resolvable`() {
         val ids = ActionCatalog.groups.flatMap { g -> g.entries.map { it.id } }
         assertEquals(ids.size, ids.toSet().size)

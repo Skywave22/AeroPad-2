@@ -65,6 +65,27 @@ object CustomRemoteCodec {
 
     fun remove(list: List<CustomButton>, id: String): List<CustomButton> =
         list.filterNot { it.id == id }
+
+    // ---- BLEK-PRO v3: share layouts as text codes ----
+    // Format: "AEROPAD1:" + Base64(JSON). Versioned prefix so future
+    // formats stay importable; Base64 survives every messenger intact
+    // (raw JSON gets mangled by smart quotes in chat apps).
+    private const val SHARE_PREFIX = "AEROPAD1:"
+
+    fun exportShare(list: List<CustomButton>): String =
+        SHARE_PREFIX + java.util.Base64.getEncoder()
+            .encodeToString(encode(list).toByteArray(Charsets.UTF_8))
+
+    /** Decodes a share code; returns null (never throws) on any garbage.
+     *  Imported buttons get FRESH ids so they merge instead of overwrite. */
+    fun importShare(code: String): List<CustomButton>? {
+        val body = code.trim().removePrefix(SHARE_PREFIX)
+        if (body == code.trim()) return null // prefix missing
+        return runCatching {
+            val json = String(java.util.Base64.getDecoder().decode(body), Charsets.UTF_8)
+            decode(json).map { it.copy(id = java.util.UUID.randomUUID().toString()) }
+        }.getOrNull()?.takeIf { it.isNotEmpty() }
+    }
 }
 
 // =====================================================================

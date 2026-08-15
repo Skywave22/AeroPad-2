@@ -75,4 +75,16 @@ class CustomRemoteViewModel @Inject constructor(
     }
 
     fun remove(id: String) = store.remove(id)
+
+    // ---- BLEK-PRO v3: layout sharing ----
+    fun exportCode(): String =
+        com.bluepilot.remote.model.custom.CustomRemoteCodec.exportShare(buttons.value)
+
+    /** Imports a share code; returns how many buttons were added (0 = bad code). */
+    fun importCode(code: String): Int {
+        val imported = com.bluepilot.remote.model.custom.CustomRemoteCodec.importShare(code)
+            ?: return 0
+        imported.forEach { store.add(it) }
+        return imported.size
+    }
 }

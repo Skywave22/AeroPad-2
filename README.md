@@ -24,6 +24,8 @@ Built 100% in Kotlin + Jetpack Compose, MVVM + Clean Architecture, Hilt, DataSto
 - **Keep PC awake (jiggler)** — invisible 1-px pointer nudge every 50 s so the PC never sleeps, locks, or marks you away.
 - **Custom Remote** — build your own remote: create buttons from a 40+ action catalog, stack steps into one-tap **macros** (e.g. type login → Tab → password → Enter).
 - **Left-handed mode** — swap left/right mouse buttons everywhere (Settings → Mouse).
+- **Precision-trackpad gestures** — 2-finger tap = right-click; 3-finger swipe left/right = Alt+Tab, up = task view, down = show desktop.
+- **Layout sharing** — export your Custom Remote as a text code, friends paste it to import (buttons merge, never overwrite).
 
 ### Connection
 - Real Bluetooth HID Device — works with Windows, macOS, Linux, Android/Google TV, most smart TVs.

@@ -16,8 +16,8 @@ android {
         applicationId = "com.bluepilot.remote"
         minSdk = 29          // Android 10+ (BluetoothHidDevice API requires 28; 29 confirmed by product decision)
         targetSdk = 34
-        versionCode = 342
-        versionName = "2.4.0"
+        versionCode = 343
+        versionName = "2.5.0"
 
         testInstrumentationRunner = "com.bluepilot.remote.HiltTestRunner"
         vectorDrawables { useSupportLibrary = true }

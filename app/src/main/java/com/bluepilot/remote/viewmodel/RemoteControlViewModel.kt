@@ -116,6 +116,23 @@ class RemoteControlViewModel @Inject constructor(
     /** Long-press on trackpad → right click. */
     fun onTrackpadLongPress() = sendAction(HidAction.MouseClick(MouseButton.RIGHT.mapped()))
 
+    /** BLEK-PRO v3 — two-finger tap = right-click (standard trackpad
+     *  behavior on Windows/macOS; honors left-handed swap). */
+    fun onTwoFingerTap() = sendAction(HidAction.MouseClick(MouseButton.RIGHT.mapped()))
+
+    /** BLEK-PRO v3 — Windows-precision-trackpad 3-finger gestures:
+     *  left/right = Alt+Tab (switch app), up = Win+Tab (task view),
+     *  down = Win+D (show desktop). Same muscle memory as a real
+     *  precision trackpad. */
+    fun onThreeFingerSwipe(horizontal: Boolean, positive: Boolean) {
+        val mods = com.bluepilot.remote.model.HidModifiers
+        when {
+            horizontal -> sendAction(HidAction.KeyTap(HidKeys.TAB, mods.LEFT_ALT))
+            positive -> sendAction(HidAction.KeyTap(HidKeys.D, mods.LEFT_GUI))
+            else -> sendAction(HidAction.KeyTap(HidKeys.TAB, mods.LEFT_GUI))
+        }
+    }
+
     /** BLEK-PRO v2 — left-handed mode: swap L/R at the single choke point
      *  every click flows through (trackpad taps + button bar + air mouse). */
     private fun MouseButton.mapped(): MouseButton =

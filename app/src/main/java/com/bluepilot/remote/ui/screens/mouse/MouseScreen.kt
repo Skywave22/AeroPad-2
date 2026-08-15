@@ -85,7 +85,7 @@ fun MouseScreen(
                 .padding(horizontal = 16.dp)
         ) {
             NotConnectedBanner(!isConnected)
-            HintBar("Long-press = right-click • two fingers scroll • pinch zooms")
+            HintBar("2-finger tap = right-click • 3-finger swipe switches apps • pinch zooms")
 
             // AEROPAD v1.0 — #19 Precision Mode + #22 Drag Lock chips.
             run {
@@ -127,10 +127,33 @@ fun MouseScreen(
                                 awaitFirstDown(requireUnconsumed = false)
                                 viewModel.onTrackpadGestureStart()
                                 var scrollAccum = 0f
+                                // BLEK-PRO v3 — gesture classification state:
+                                // peak finger count + total travel decide, on
+                                // release, between 2-finger tap (right-click)
+                                // and 3-finger swipe (app switch / desktop /
+                                // task view). Travel gates prevent misfires.
+                                var maxFingers = 1
+                                var travel = 0f
+                                var threeX = 0f
+                                var threeY = 0f
+                                val gestureStart = System.currentTimeMillis()
                                 while (true) {
                                     val event = awaitPointerEvent()
                                     val pressed = event.changes.filter { it.pressed }
                                     if (pressed.isEmpty()) break
+                                    if (pressed.size > maxFingers) maxFingers = pressed.size
+                                    travel += pressed.maxOf {
+                                        (it.position - it.previousPosition).getDistance()
+                                    }
+                                    if (pressed.size >= 3) {
+                                        // Accumulate common 3-finger motion.
+                                        threeX += pressed.map { it.position.x - it.previousPosition.x }
+                                            .average().toFloat()
+                                        threeY += pressed.map { it.position.y - it.previousPosition.y }
+                                            .average().toFloat()
+                                        event.changes.forEach { it.consume() }
+                                        continue
+                                    }
                                     if (pressed.size >= 2) {
                                         // FEATURE: pinch-to-zoom vs two-finger scroll.
                                         // Compare finger-distance change (pinch)
@@ -154,11 +177,32 @@ fun MouseScreen(
                                             }
                                         }
                                     } else {
-                                        val c = pressed.first()
-                                        val d = c.position - c.previousPosition
-                                        viewModel.onTrackpadDelta(d.x, d.y)
+                                        // Don't jerk the pointer with the last
+                                        // lingering finger of a multi-touch
+                                        // gesture lifting off.
+                                        if (maxFingers == 1) {
+                                            val c = pressed.first()
+                                            val d = c.position - c.previousPosition
+                                            viewModel.onTrackpadDelta(d.x, d.y)
+                                        }
                                     }
                                     event.changes.forEach { it.consume() }
+                                }
+                                // ---- Gesture release: classify ----
+                                val elapsed = System.currentTimeMillis() - gestureStart
+                                if (maxFingers == 2 && travel < 24f && elapsed < 300) {
+                                    // Two-finger tap → right-click.
+                                    haptic(); viewModel.onTwoFingerTap()
+                                } else if (maxFingers >= 3) {
+                                    val ax = kotlin.math.abs(threeX)
+                                    val ay = kotlin.math.abs(threeY)
+                                    if (ax > 60f || ay > 60f) {
+                                        haptic()
+                                        viewModel.onThreeFingerSwipe(
+                                            horizontal = ax >= ay,
+                                            positive = threeY > 0f
+                                        )
+                                    }
                                 }
                             }
                         }
