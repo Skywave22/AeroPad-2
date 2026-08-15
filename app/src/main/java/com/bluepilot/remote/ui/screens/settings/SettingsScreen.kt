@@ -161,6 +161,12 @@ fun SettingsScreen(
                     subtitle = "While connected, the phone's volume keys change the PC volume"
                 )
                 ToggleRow(
+                    "Keep PC awake",
+                    app.keepAwake,
+                    viewModel::setKeepAwake,
+                    subtitle = "Jiggler mode: invisible pointer nudge every 50 s so the PC never sleeps, locks, or marks you away"
+                )
+                ToggleRow(
                     "Reconnect on launch",
                     app.autoReconnectLast,
                     viewModel::setAutoReconnectLast,

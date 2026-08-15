@@ -27,6 +27,9 @@ data class AppSettings(
     val onboardingDone: Boolean = false,
     /** FEATURE: phone volume buttons control the PC volume while connected. */
     val volumeKeysToPc: Boolean = true,
+    /** BLEK-PRO: Keep-Alive / jiggler — tiny invisible mouse move every 50 s
+     *  while connected so the PC never sleeps, locks, or shows you "away". */
+    val keepAwake: Boolean = false,
     /** FEATURE: quick text snippets — user-saved phrases typed with one
      *  tap from the Keyboard screen. Stored as unit-separator joined
      *  string (U+001F never appears in normal text). Max 20. */

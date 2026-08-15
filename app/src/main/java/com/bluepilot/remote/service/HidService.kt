@@ -20,10 +20,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -63,6 +67,7 @@ class HidService : Service() {
 
     @Inject lateinit var hidController: HidController
     @Inject lateinit var haptics: com.bluepilot.remote.haptics.Haptics
+    @Inject lateinit var settingsStore: com.bluepilot.remote.domain.SettingsStore
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -92,6 +97,28 @@ class HidService : Service() {
                 }
             }
             .launchIn(serviceScope)
+        // BLEK-PRO — Keep-Alive / jiggler: while connected AND the setting is
+        // on, nudge the pointer 1px right then 1px back every 50 s. Invisible
+        // to the user, but the PC registers activity — no sleep, no lock, no
+        // "away" status. collectLatest cancels the loop instantly when the
+        // link drops or the toggle flips off; zero work otherwise.
+        serviceScope.launch {
+            combine(
+                hidController.state.map { it is HidConnectionState.Connected },
+                settingsStore.appSettings.map { it.keepAwake }
+            ) { connected, keepAwake -> connected && keepAwake }
+                .distinctUntilChanged()
+                .collectLatest { active ->
+                    if (!active) return@collectLatest
+                    Timber.i("KeepAwake jiggler started")
+                    while (true) {
+                        delay(50_000L)
+                        hidController.send(com.bluepilot.remote.model.HidAction.MouseMove(1, 0))
+                        delay(120L)
+                        hidController.send(com.bluepilot.remote.model.HidAction.MouseMove(-1, 0))
+                    }
+                }
+        }
         Timber.i("HidService created")
     }
 

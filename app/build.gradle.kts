@@ -16,8 +16,8 @@ android {
         applicationId = "com.bluepilot.remote"
         minSdk = 29          // Android 10+ (BluetoothHidDevice API requires 28; 29 confirmed by product decision)
         targetSdk = 34
-        versionCode = 340
-        versionName = "3.4.0"
+        versionCode = 341
+        versionName = "2.3.0"
 
         testInstrumentationRunner = "com.bluepilot.remote.HiltTestRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -126,6 +126,9 @@ dependencies {
 
     // Serialization (layout import/export)
     implementation(libs.kotlinx.serialization.json)
+
+    // BLEK-PRO PACK — QR/barcode scanner
+    implementation(libs.zxing.embedded)
 
     // Logging
     implementation(libs.timber)

@@ -78,6 +78,16 @@ class RemoteControlViewModel @Inject constructor(
     val precisionMode: kotlinx.coroutines.flow.StateFlow<Boolean> = _precisionMode
     fun setPrecisionMode(on: Boolean) { _precisionMode.value = on }
 
+    /** BLEK-PRO — Air Mouse: gyroscope deltas arrive pre-scaled in pointer
+     *  px; clamp to the HID report range and send raw (no trackpad
+     *  smoothing — rotation rate is already smooth and adding the
+     *  low-pass filter made it feel laggy). */
+    fun onAirMouseDelta(dx: Int, dy: Int) {
+        val cx = dx.coerceIn(-127, 127)
+        val cy = dy.coerceIn(-127, 127)
+        if (cx != 0 || cy != 0) sendAction(HidAction.MouseMove(cx, cy))
+    }
+
     // AEROPAD v1.0 #22 — click-and-drag lock: LEFT held until unlocked.
     private val _dragLock = kotlinx.coroutines.flow.MutableStateFlow(false)
     val dragLock: kotlinx.coroutines.flow.StateFlow<Boolean> = _dragLock

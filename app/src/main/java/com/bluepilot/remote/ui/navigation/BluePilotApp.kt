@@ -53,6 +53,9 @@ object Routes {
     const val SETTINGS = "settings"
     const val HELP = "help"
     const val FULL_KEYBOARD = "full_keyboard"
+    // BLEK-PRO PACK
+    const val AIR_MOUSE = "air_mouse"
+    const val SCANNER = "scanner"
 }
 
 @Composable
@@ -165,6 +168,13 @@ fun BluePilotApp(
         }
         composable(Routes.HELP) { HelpScreen(onBack = { navController.popBackStack() }) }
         composable(Routes.FULL_KEYBOARD) { FullKeyboardScreen(onBack = { navController.popBackStack() }) }
+        // BLEK-PRO PACK
+        composable(Routes.AIR_MOUSE) {
+            com.bluepilot.remote.ui.screens.airmouse.AirMouseScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.SCANNER) {
+            com.bluepilot.remote.ui.screens.scanner.ScannerScreen(onBack = { navController.popBackStack() })
+        }
     }
 
     // Floating glass dock — hubs only.
@@ -179,10 +189,18 @@ fun BluePilotApp(
         GlassDock(
             currentRoute = currentRoute,
             onNavigate = { route ->
-                navController.navigate(route) {
-                    popUpTo(Routes.HOME) { saveState = true }
-                    launchSingleTop = true
-                    restoreState = true
+                // NAV FIX: navigating to a hub that is ALREADY in the back
+                // stack (e.g. tapping Home from Settings) must POP back to
+                // it, not push/no-op. The old popUpTo+restoreState combo
+                // silently did nothing when the target was the start
+                // destination — Home looked dead until the user pressed
+                // the back arrow.
+                val popped = navController.popBackStack(route, false)
+                if (!popped) {
+                    navController.navigate(route) {
+                        popUpTo(Routes.HOME) { saveState = true }
+                        launchSingleTop = true
+                    }
                 }
             }
         )

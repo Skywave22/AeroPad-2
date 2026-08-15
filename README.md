@@ -17,6 +17,11 @@ Built 100% in Kotlin + Jetpack Compose, MVVM + Clean Architecture, Hilt, DataSto
 - **Modifier lock** — arm Ctrl/Shift/Alt/Win as sticky toggles, tap any key to fire the combo.
 - **Phone volume buttons control the PC** while connected (toggleable).
 - **Notification media controls** — prev/play/next buttons for the PC right in the notification shade.
+- **Air Mouse** — wave the phone like a TV magic remote to steer the PC pointer (gyroscope, hold-to-move clutch, sensitivity slider).
+- **Scanner** — scan QR codes & barcodes with the camera and type them straight on the PC (auto-send mode for inventory work).
+- **Voice input** — dictate with the system speech recognizer, review, then send to the PC.
+- **Clipboard sync** — one tap types the phone's clipboard on the PC.
+- **Keep PC awake (jiggler)** — invisible 1-px pointer nudge every 50 s so the PC never sleeps, locks, or marks you away.
 
 ### Connection
 - Real Bluetooth HID Device — works with Windows, macOS, Linux, Android/Google TV, most smart TVs.

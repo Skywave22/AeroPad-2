@@ -18,6 +18,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.ContentPaste
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.content.Intent
+import android.speech.RecognizerIntent
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -136,6 +141,64 @@ fun KeyboardScreen(
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
+                    }
+                }
+                // BLEK-PRO — Voice input + clipboard sync row.
+                run {
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    // Speech-to-text via the system recognizer (Google/device
+                    // engine). Result lands in the text field so the user can
+                    // review before sending — mis-recognitions never reach the PC.
+                    val speechLauncher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.StartActivityForResult()
+                    ) { result ->
+                        val spoken = result.data
+                            ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                            ?.firstOrNull()
+                        if (!spoken.isNullOrBlank()) {
+                            text = if (text.isBlank()) spoken else "$text $spoken"
+                        }
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        androidx.compose.material3.AssistChip(
+                            onClick = {
+                                haptic()
+                                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                    putExtra(
+                                        RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                        RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                                    )
+                                    putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak — text goes to the input bar")
+                                }
+                                runCatching { speechLauncher.launch(intent) }
+                            },
+                            label = { Text("Voice input") },
+                            leadingIcon = {
+                                Icon(Icons.Rounded.Mic, contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary)
+                            }
+                        )
+                        androidx.compose.material3.AssistChip(
+                            onClick = {
+                                // Clipboard sync: type the phone's clipboard on the PC.
+                                haptic()
+                                val cm = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                                    as android.content.ClipboardManager
+                                val clip = cm.primaryClip?.getItemAt(0)
+                                    ?.coerceToText(context)?.toString()
+                                if (!clip.isNullOrBlank()) viewModel.typeText(clip)
+                            },
+                            label = { Text("Send clipboard") },
+                            leadingIcon = {
+                                Icon(Icons.Rounded.ContentPaste, contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary)
+                            }
+                        )
                     }
                 }
                 // AEROPAD v1.0 #12 — sent-text history (tap to resend).
